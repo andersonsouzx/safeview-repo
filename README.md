@@ -1,5 +1,9 @@
 # 🛡️ SafeView | Dashboard de Segurança Inteligente
 
+<div align="center">
+  <img src="dashboard.png" alt="Print do Dashboard SafeView" width="700">
+</div>
+
 Este é o protótipo do **SafeView**, um sistema web focado em mapeamento criminal via crowdsourcing de dados. Projeto desenvolvido para a disciplina de Projeto de Extensão TIC da Uninove pela equipe **The Halls**.
 
 ---
