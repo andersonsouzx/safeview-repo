@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>SIBO SafeView | Dashboard TIC | The Halls</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Estilos Globais */
+        :root { --dark-blue: #1a252f; --mid-blue: #2c3e50; --light-blue: #3498db; --bg-light: #f4f7f6; --text-light: #ecf0f1; --shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; background: var(--bg-light); }
+        
+        /* Barra Lateral */
+        #sidebar { width: 280px; background: var(--dark-blue); color: var(--text-light); padding: 25px; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 1000; transition: 0.3s; }
+        #sidebar h1 { font-size: 20px; margin-bottom: 35px; border-bottom: 2px solid var(--light-blue); padding-bottom: 15px; color: var(--text-light); }
+        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 8px; display: flex; align-items: center; font-size: 14px; font-weight: 500; }
+        .menu-item i { margin-right: 15px; font-size: 18px; color: #bdc3c7; }
+        .menu-item:hover, .menu-item.active { background: var(--mid-blue); }
+        .menu-item:hover i, .menu-item.active i { color: var(--light-blue); }
+        
+        /* Área Principal */
+        #main-content { flex-grow: 1; position: relative; height: 100%; width: 100%; }
+        #map { height: 100%; width: 100%; cursor: crosshair; }
+        
+        #instrucao { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; pointer-events: none; font-size: 14px; }
+
+        .widget-card { background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); position: absolute; z-index: 1000; transition: 0.3s; border: 1px solid #e1e8ed; }
+        .widget-card h3 { margin-top: 0; color: var(--mid-blue); font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; }
+        .widget-card h3 i { margin-right: 10px; color: var(--light-blue); }
+
+        /* PAINÉIS */
+        #metrics-panel { top: 20px; right: 20px; width: 320px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .metric-item { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e1e8ed; }
+        .metric-title { font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .metric-value { font-size: 28px; font-weight: bold; color: var(--mid-blue); }
+        .metric-desc { font-size: 11px; color: #95a5a6; margin-top: 3px; }
+
+        #chart-panel { top: 160px; right: 20px; width: 320px; height: 200px; display: none; }
+        #chart-container { width: 100%; height: 140px; background: #fdfdfd; display: flex; align-items: center; justify-content: center; color: #bdc3c7; border: 1px dashed #e1e8ed; border-radius: 8px;} 
+
+        #legend-panel { top: 100px; left: 20px; width: 280px; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 13px; color: #333; }
+        .legend-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; }
+        .icon-car { color: #3498db; } .icon-phone { color: #8e44ad; } .icon-person { color: #e74c3c; } .icon-vandal { color: #f39c12; } .icon-other { color: #27ae60; }
+        
+        #feed-panel { top: 100px; left: 20px; width: 300px; max-height: 400px; overflow-y: auto; display: none; }
+        .feed-item { font-size: 13px; border-bottom: 1px solid #eee; padding: 12px 0; color: #333; display: flex; align-items: flex-start; }
+        .feed-item i { margin-right: 15px; font-size: 18px; color: #bdc3c7; margin-top: 2px; }
+        .feed-details { flex-grow: 1; }
+        
+        /* Modal do Formulário */
+        #modal-registro { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; width: 300px; border: 1px solid #e1e8ed; }
+        #modal-registro h3 { margin-top: 0; color: var(--mid-blue); margin-bottom: 15px; }
+        #modal-registro select { width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; font-family: inherit; }
+        .btn-form { padding: 12px; color: white; border: none; width: 100%; cursor: pointer; border-radius: 8px; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .btn-confirmar { background: #27ae60; } .btn-confirmar:hover { background: #219150; }
+        .btn-cancelar { background: #95a5a6; } .btn-cancelar:hover { background: #7f8c8d; }
+
+        /* Estilos dos Marcadores */
+        .custom-map-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: -2px 2px 6px rgba(0,0,0,0.5); border: 2px solid white; color: white; }
+        .custom-map-pin i { transform: rotate(45deg); font-size: 14px; margin-top: -2px; margin-left: -2px; }
+        .marker-car { background: #3498db; } .marker-phone { background: #8e44ad; } .marker-person { background: #e74c3c; } .marker-vandal { background: #f39c12; } .marker-other { background: #27ae60; }
+        .leaflet-div-icon { background: transparent; border: none; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h1>🛡️ SIBO SafeView</h1>
+        <div class="menu-item active" onclick="mostrarAba('mapa', this)"><i class="fas fa-map-signs"></i> Mapa de Calor Criminal</div>
+        <div class="menu-item" onclick="mostrarAba('feed', this)"><i class="fas fa-bell"></i> Live Feed</div>
+        <div class="menu-item" onclick="mostrarAba('grafico', this)"><i class="fas fa-chart-bar"></i> Ocorrências por Horário</div>
+        <div class="menu-item" onclick="alert('Basta clicar em qualquer lugar do mapa para registrar!')"><i class="fas fa-edit"></i> Registrar Ocorrência</div>
+        
+        <div style="margin-top: auto; font-size: 11px; color: #bdc3c7; border-top: 1px solid #34495e; padding-top: 15px;">
+            Desenvolvido por: The Halls<br>
+            Projeto de Extensão TIC | Uninove
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div id="map"></div>
+        
+        <div id="metrics-panel" class="widget-card">
+            <div class="metric-item">
+                <div class="metric-title">TOTAL (Geral)</div>
+                <div class="metric-value" id="metric-total">--</div>
+                <div class="metric-desc">Ocorrências Registradas</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-title">Mais Frequente</div>
+                <div class="metric-value" style="font-size: 12px; height: 38px; color: #e74c3c;" id="metric-frequent">--</div>
+                <div class="metric-desc">Tipo de Crime</div>
+            </div>
+        </div>
+
+        <div id="chart-panel" class="widget-card">
+            <h3><i class="fas fa-chart-bar"></i> Ocorrências por Horário</h3>
+            <div id="chart-container">[ Gráfico Chart.js - Em breve ]</div>
+        </div>
+
+        <div id="legend-panel" class="widget-card">
+            <h3><i class="fas fa-map-signs"></i> Mapa de Calor Criminal</h3>
+            <div class="legend-item"><div class="legend-icon icon-car"><i class="fas fa-car-side"></i></div> Roubo de Veículo</div>
+            <div class="legend-item"><div class="legend-icon icon-phone"><i class="fas fa-mobile-alt"></i></div> Roubo a Pedestre</div>
+            <div class="legend-item"><div class="legend-icon icon-person"><i class="fas fa-user-shield"></i></div> Agressão Física</div>
+            <div class="legend-item"><div class="legend-icon icon-vandal"><i class="fas fa-spray-can"></i></div> Vandalismo</div>
+            <div class="legend-item"><div class="legend-icon icon-other"><i class="fas fa-question-circle"></i></div> Outros</div>
+        </div>
+        
+        <div id="feed-panel" class="widget-card">
+            <h3><i class="fas fa-bell"></i> Live Feed</h3>
+            <div id="feed-lista"></div>
+        </div>
+
+        <div id="modal-registro">
+            <h3>Registrar Ocorrência</h3>
+            <p style="font-size: 11px; color: #7f8c8d; margin-top: -5px;">Local capturado via GPS do mapa.</p>
+            <label style="font-size: 13px;"><strong>Tipo de Ocorrência:</strong></label>
+            <select id="tipo-crime">
+                <option value="" disabled selected>Selecione a ocorrência...</option>
+                <option value="Roubo a Pedestre (com ameaça)">Roubo a Pedestre (com ameaça)</option>
+                <option value="Furto a Pedestre (sem violência)">Furto a Pedestre (sem violência)</option>
+                <option value="Roubo de Veículo">Roubo de Veículo</option>
+                <option value="Furto de Veículo">Furto de Veículo</option>
+                <option value="Agressão Física">Agressão Física</option>
+                <option value="Vandalismo / Dano ao Patrimônio">Vandalismo / Dano ao Patrimônio</option>
+                <option value="Tráfico de Drogas">Tráfico de Drogas</option>
+                <option value="Atividade Suspeita">Atividade Suspeita</option>
+                <option value="Perturbação do Sossego">Perturbação do Sossego</option>
+            </select>
+            <input type="hidden" id="lat-input">
+            <input type="hidden" id="lng-input">
+            <button class="btn-form btn-confirmar" onclick="enviarRegistro()">Confirmar Registro</button>
+            <button class="btn-form btn-cancelar" onclick="fecharModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+
+    <script>
+        function mostrarAba(abaId, elementoClicado) {
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            elementoClicado.classList.add('active');
+
+            document.getElementById('legend-panel').style.display = 'none';
+            document.getElementById('feed-panel').style.display = 'none';
+            document.getElementById('chart-panel').style.display = 'none';
+
+            if (abaId === 'mapa') {
+                document.getElementById('legend-panel').style.display = 'block';
+            } else if (abaId === 'feed') {
+                document.getElementById('feed-panel').style.display = 'block';
+            } else if (abaId === 'grafico') {
+                document.getElementById('chart-panel').style.display = 'block';
+            }
+        }
+
+        var map = L.map('map', { zoomControl: false }).setView([-23.5505, -46.6333], 13);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(map);
+        
+        var heatLayer = L.heatLayer([], {
+            radius: 35, blur: 20, maxZoom: 14,
+            gradient: { 0.3: 'blue', 0.6: '#e67e22', 1.0: '#c0392b' }
+        }).addTo(map);
+
+        function calibrarCalorAoZoomar() {
+            var zoomAtual = map.getZoom(); 
+            var novoRaio = 35 - (zoomAtual - 13) * 3; 
+            var novoBlur = 20 - (zoomAtual - 13) * 2; 
+            if (novoRaio < 10) novoRaio = 10; 
+            if (novoBlur < 8) novoBlur = 8; 
+            heatLayer.setOptions({radius: novoRaio, blur: novoBlur});
+        }
+        map.on('zoomend', calibrarCalorAoZoomar);
+        
+        var markerGroup = L.layerGroup().addTo(map);
+        var tempMarker; 
+
+        function obterIconePorCrime(tipo) {
+            let iconClass = 'fa-question-circle'; let colorClass = 'marker-other';
+            if (tipo.includes("Veículo")) { iconClass = 'fa-car-side'; colorClass = 'marker-car'; }
+            else if (tipo.includes("Pedestre") || tipo.includes("Celular")) { iconClass = 'fa-mobile-alt'; colorClass = 'marker-phone'; }
+            else if (tipo.includes("Agressão")) { iconClass = 'fa-user-shield'; colorClass = 'marker-person'; }
+            else if (tipo.includes("Vandalismo")) { iconClass = 'fa-spray-can'; colorClass = 'marker-vandal'; }
+
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="custom-map-pin ${colorClass}"><i class="fas ${iconClass}"></i></div>`,
+                iconSize: [30, 30], iconAnchor: [15, 30] 
+            });
+        }
+
+        map.on('click', function(e) {
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker(e.latlng).addTo(map);
+            document.getElementById('lat-input').value = e.latlng.lat;
+            document.getElementById('lng-input').value = e.latlng.lng;
+            document.getElementById('modal-registro').style.display = 'block';
+        });
+
+        function fecharModal() {
+            document.getElementById('modal-registro').style.display = 'none';
+            document.getElementById('tipo-crime').selectedIndex = 0; 
+            if (tempMarker) map.removeLayer(tempMarker);
+        }
+
+        function enviarRegistro() {
+            const tipo = document.getElementById('tipo-crime').value;
+            if (!tipo) { alert("Por favor, selecione o tipo de ocorrência."); return; }
+            const lat = document.getElementById('lat-input').value;
+            const lng = document.getElementById('lng-input').value;
+            
+            fetch('/registrar', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tipo: tipo, lat: parseFloat(lat), lng: parseFloat(lng) })
+            }).then(() => {
+                fecharModal(); atualizarInterface(); 
+            });
+        }
+
+        function atualizarInterface() {
+            fetch('/dados').then(res => res.json()).then(pontos => {
+                markerGroup.clearLayers();
+                
+                const coordsCalor = pontos.map(p => [p.lat, p.lng]);
+                heatLayer.setLatLngs(coordsCalor);
+                
+                const lista = document.getElementById('feed-lista');
+                lista.innerHTML = "";
+                
+                const contagemCrimes = {};
+                let crimeMaisFrequente = "--";
+                let maxOcorrencias = 0;
+
+                pontos.forEach((p, index) => {
+                    contagemCrimes[p.tipo] = (contagemCrimes[p.tipo] || 0) + 1;
+                    if (contagemCrimes[p.tipo] > maxOcorrencias) {
+                        maxOcorrencias = contagemCrimes[p.tipo];
+                        crimeMaisFrequente = p.tipo;
+                    }
+
+                    // ADICIONAMOS A VARIÁVEL #ID NO BALÃO DO MAPA
+                    L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
+                     .bindPopup(`<strong>#${p.id} - ${p.tipo}</strong><br><small>${p.data_hora}</small>`)
+                     .addTo(markerGroup);
+                    
+                    // ADICIONAMOS A VARIÁVEL #ID NO FEED LATERAL
+                    if (index < 10) {
+                        lista.innerHTML += `
+                            <div class="feed-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="feed-details">
+                                    <strong>#${p.id} - ${p.tipo}</strong><br>
+                                    <small>${p.data_hora}</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                document.getElementById('metric-total').innerText = pontos.length;
+                document.getElementById('metric-frequent').innerText = crimeMaisFrequente;
+            });
+        }
+        
+        atualizarInterface(); 
+    </script>
+</body>
+</html>
