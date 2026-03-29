@@ -19,7 +19,7 @@ def init_db():
     ''')
     
     # SEEDING: Insere dados falsos se o banco estiver zerado
-    cursor.execute("SELECT COUNT(*) FROM ocorrencias")
+    '''cursor.execute("SELECT COUNT(*) FROM ocorrencias")
     if cursor.fetchone()[0] == 0:
         print("Banco vazio! Inserindo ocorrências fictícias iniciais...")
         dados_ficticios = [
@@ -30,7 +30,7 @@ def init_db():
             ("Roubo de Veículo", -23.5400, -46.6300, "2026-03-17 22:10:00"),
             ("Agressão Física", -23.5590, -46.6310, "2026-03-19 13:20:00")
         ]
-        cursor.executemany("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)", dados_ficticios)
+        cursor.executemany("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)", dados_ficticios)'''
         
     conn.commit()
     conn.close()
@@ -40,20 +40,48 @@ def init_db():
 def index():
     return render_template('index.html')
 
-# 3. Rota para Receber as Ocorrências
+# 3. Rota para Receber as Ocorrências (AGORA BLINDADA)
 @app.route('/registrar', methods=['POST'])
 def registrar():
     data = request.json
+    
+    # --- 1. TRAVA DE SEGURANÇA: Tipos de Crime ---
+    # Só aceita o que estiver exatamente nesta lista (bloqueia scripts HTML/JS)
+    tipos_permitidos = [
+        "Roubo a Pedestre (com ameaça)",
+        "Furto a Pedestre (sem violência)",
+        "Roubo de Veículo",
+        "Furto de Veículo",
+        "Agressão Física",
+        "Vandalismo / Dano ao Patrimônio",
+        "Tráfico de Drogas",
+        "Atividade Suspeita",
+        "Perturbação do Sossego"
+    ]
+    
+    if data.get('tipo') not in tipos_permitidos:
+        # Se o invasor mandar algo fora da lista, o servidor devolve um erro 400 (Bad Request)
+        return jsonify({"status": "erro", "mensagem": "Tipo de ocorrência inválido ou não autorizado."}), 400
+
+    # --- 2. TRAVA DE SEGURANÇA: Coordenadas ---
+    # Garante que Latitude e Longitude são números reais, e não textos maliciosos
+    try:
+        lat = float(data.get('lat'))
+        lng = float(data.get('lng'))
+    except (ValueError, TypeError):
+        return jsonify({"status": "erro", "mensagem": "Coordenadas geográficas inválidas."}), 400
+
+    # Se passou pelas duas travas de segurança, o dado é limpo e seguro para salvar!
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     conn = sqlite3.connect('sibo.db')
     cursor = conn.cursor()
     cursor.execute("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)",
-                   (data['tipo'], data['lat'], data['lng'], agora))
+                   (data['tipo'], lat, lng, agora))
     conn.commit()
     conn.close()
     
-    return jsonify({"status": "sucesso", "mensagem": "Ocorrência registrada!"})
+    return jsonify({"status": "sucesso", "mensagem": "Ocorrência registrada com segurança!"})
 
 # 4. Rota para Alimentar o Mapa e o Feed (AGORA COM O ID)
 @app.route('/dados')

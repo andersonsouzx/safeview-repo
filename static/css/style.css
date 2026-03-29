@@ -1,0 +1,404 @@
+/* ==========================================================================
+   VARIÁVEIS GLOBAIS E RESET DE ESTILOS
+   ========================================================================== */
+:root {
+    --dark-blue: #1a252f;
+    --mid-blue: #2c3e50;
+    --light-blue: #3498db;
+    --bg-light: #f4f7f6;
+    --text-light: #ecf0f1;
+    --shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-light);
+}
+
+/* ==========================================================================
+   ESTRUTURA PRINCIPAL (MAPA E ÁREA CENTRAL)
+   ========================================================================== */
+#main-content {
+    flex-grow: 1;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    cursor: crosshair;
+}
+
+/* ==========================================================================
+   MENU LATERAL (SIDEBAR)
+   ========================================================================== */
+#sidebar {
+    width: 280px;
+    background: var(--dark-blue);
+    color: var(--text-light);
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: 0.3s;
+}
+
+#sidebar h1 {
+    font-size: 20px;
+    margin-bottom: 35px;
+    border-bottom: 2px solid var(--light-blue);
+    padding-bottom: 15px;
+    color: var(--text-light);
+}
+
+.menu-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.3s;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.menu-item i {
+    margin-right: 15px;
+    font-size: 18px;
+    color: #bdc3c7;
+}
+
+.menu-item:hover, 
+.menu-item.active {
+    background: var(--mid-blue);
+}
+
+.menu-item:hover i, 
+.menu-item.active i {
+    color: var(--light-blue);
+}
+
+/* ==========================================================================
+   PAINÉIS FIXOS (DASHBOARD SUPERIOR)
+   ========================================================================== */
+.widget-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    position: absolute;
+    z-index: 1000;
+    transition: 0.3s;
+    border: 1px solid #e1e8ed;
+}
+
+.widget-card h3 {
+    margin-top: 0;
+    color: var(--mid-blue);
+    font-size: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.widget-card h3 i {
+    margin-right: 10px;
+    color: var(--light-blue);
+}
+
+#metrics-panel {
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.metric-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e1e8ed;
+}
+
+.metric-title {
+    font-size: 11px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--mid-blue);
+}
+
+.metric-desc {
+    font-size: 11px;
+    color: #95a5a6;
+    margin-top: 3px;
+}
+
+/* ==========================================================================
+   PAINÉIS FLUTUANTES (LEGENDA, FEED E GRÁFICOS)
+   ========================================================================== */
+.painel-flutuante {
+    display: none;
+    position: absolute;
+    top: 200px;
+    right: 39px; /* Alinhado com o painel de métricas acima */
+    width: 320px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.cabecalho-painel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e293b;
+    color: white;
+    padding: 12px 15px;
+}
+
+.cabecalho-painel h3 {
+    margin: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-fechar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-fechar:hover {
+    color: #ff4757;
+}
+
+.conteudo-painel {
+    padding: 15px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Itens de conteúdo dentro dos painéis */
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #333;
+}
+
+.legend-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.feed-item {
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+    color: #333;
+    display: flex;
+    align-items: flex-start;
+}
+
+.feed-item i {
+    margin-right: 15px;
+    font-size: 18px;
+    color: #bdc3c7;
+    margin-top: 2px;
+}
+
+.feed-details {
+    flex-grow: 1;
+}
+
+#chart-container {
+    width: 100%;
+    height: 140px;
+    background: #fdfdfd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bdc3c7;
+    border: 1px dashed #e1e8ed;
+    border-radius: 8px;
+}
+
+/* ==========================================================================
+   MODAL DE REGISTRO DE OCORRÊNCIA (Novo Posicionamento)
+   ========================================================================== */
+#modal-registro {
+    display: none;
+    position: absolute;
+    top: 200px;
+    left: 39px; /* Mesma linha dos outros painéis para não tampar o centro */
+    width: 320px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 2000;
+    border: 1px solid #e1e8ed;
+}
+
+#modal-registro h3 {
+    margin-top: 0;
+    color: var(--mid-blue);
+    margin-bottom: 15px;
+}
+
+#modal-registro select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.btn-form {
+    padding: 12px;
+    color: white;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.btn-confirmar {
+    background: #27ae60;
+}
+
+.btn-confirmar:hover {
+    background: #219150;
+}
+
+.btn-cancelar {
+    background: #95a5a6;
+}
+
+.btn-cancelar:hover {
+    background: #7f8c8d;
+}
+
+/* ==========================================================================
+   MARCADORES DO MAPA (PINOS E CORES)
+   ========================================================================== */
+.custom-map-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: -2px 2px 6px rgba(0,0,0,0.5);
+    border: 2px solid white;
+    color: white;
+}
+
+.custom-map-pin i {
+    transform: rotate(45deg);
+    font-size: 14px;
+    margin-top: -2px;
+    margin-left: -2px;
+}
+
+.leaflet-div-icon {
+    background: transparent;
+    border: none;
+}
+
+/* Configuração de Cores (Ícones da Legenda e Pinos no Mapa) */
+.icon-car, .marker-car { color: #3498db; }
+.marker-car { background: #3498db; color: white; }
+
+.icon-phone, .marker-phone { color: #8e44ad; }
+.marker-phone { background: #8e44ad; color: white; }
+
+.icon-person, .marker-person { color: #e74c3c; }
+.marker-person { background: #e74c3c; color: white; }
+
+.icon-vandal, .marker-vandal { color: #f39c12; }
+.marker-vandal { background: #f39c12; color: white; }
+
+.icon-other, .marker-other { color: #27ae60; }
+.marker-other { background: #27ae60; color: white; }
+
+/* ==========================================================================
+   BOTÕES FLUTUANTES NO MAPA (Ex: Reposicionar)
+   ========================================================================== */
+.btn-flutuante {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    z-index: 1000;
+    background-color: whitesmoke;
+    color: #1A73E8; 
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    width: 48px;  
+    height: 48px; 
+    font-size: 20px; 
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-flutuante:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+/* --- BARRA SUPERIOR ARRASTÁVEL (Estilo Janela) --- */
+.drag-header {
+    padding: 15px 20px;
+    background-color: #f8f9fa; /* Fundo levemente cinza destacando o cabeçalho */
+    border-bottom: 1px solid #e1e8ed;
+    border-radius: 8px 8px 0 0; /* Arredonda só os cantos de cima */
+    cursor: grab; /* Mãozinha aberta */
+    display: flex;
+    align-items: center;
+}
+
+.drag-header:active {
+    cursor: grabbing; /* Mãozinha fechada quando você segura o clique! */
+}
