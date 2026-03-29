@@ -21,10 +21,10 @@ Antes de começar, você precisa ter instalado no seu PC:
 Se você acabou de pegar o projeto, abra o **VS Code**, clique em `Terminal > Novo Terminal` e rode os comandos abaixo, um por um, apertando Enter após cada linha:
 
 **1. Baixe o código do GitHub:**
-`git clone https://github.com/andersonsouzx/safeview-prototipo.git`
+`git clone https://github.com/andersonsouzx/safeview-repo.git`
 
 **2. Entre na pasta do projeto:**
-`cd safeview-prototipo`
+`cd safeview-repo`
 
 **3. Crie o Ambiente Virtual (A "bolha" do Python):**
 `python -m venv venv`
