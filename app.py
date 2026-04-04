@@ -44,6 +44,19 @@ def index():
 @app.route('/registrar', methods=['POST'])
 def registrar():
     data = request.json
+    # ... mantenha suas travas de segurança aqui ...
+
+    # Pega a data enviada pelo seu novo input
+    data_hora = data.get('data_hora')
+    
+    conn = sqlite3.connect('sibo.db')
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)",
+                   (data['tipo'], data.get('lat'), data.get('lng'), data_hora))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"status": "sucesso"})
     
     # --- 1. TRAVA DE SEGURANÇA: Tipos de Crime ---
     # Só aceita o que estiver exatamente nesta lista (bloqueia scripts HTML/JS)
@@ -96,6 +109,28 @@ def dados():
     # Formata os dados enviando o ID para o JavaScript
     pontos = [{"id": r[0], "tipo": r[1], "lat": r[2], "lng": r[3], "data_hora": r[4]} for r in registros]
     return jsonify(pontos)
+
+# 5. Rota para Alimentar o Gráfico de Horários
+@app.route('/estatisticas/horarios')
+def estatisticas_horarios():
+    conn = sqlite3.connect('sibo.db')
+    cursor = conn.cursor()
+    
+    # O SQLite recorta a string da data ("2026-03-18 14:30:00") para pegar só o "14"
+    # E já conta quantos crimes aconteceram naquela hora
+    cursor.execute('''
+        SELECT substr(data_hora, 12, 2) as hora, COUNT(*) as total 
+        FROM ocorrencias 
+        GROUP BY hora
+    ''')
+    
+    resultados = cursor.fetchall()
+    conn.close()
+    
+    # Transforma o resultado num dicionário, ex: {"14": 5, "02": 1, "22": 3}
+    dados_horarios = {linha[0]: linha[1] for linha in resultados if linha[0]}
+    
+    return jsonify(dados_horarios)
 
 if __name__ == '__main__':
     init_db()

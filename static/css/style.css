@@ -7,7 +7,7 @@
     --light-blue: #3498db;
     --bg-light: #f4f7f6;
     --text-light: #ecf0f1;
-    --shadow: 0 4px 15px rgba(0,0,0,0.2);
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 body {
@@ -45,7 +45,7 @@ body {
     padding: 25px;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     transition: 0.3s;
 }
@@ -76,12 +76,12 @@ body {
     color: #bdc3c7;
 }
 
-.menu-item:hover, 
+.menu-item:hover,
 .menu-item.active {
     background: var(--mid-blue);
 }
 
-.menu-item:hover i, 
+.menu-item:hover i,
 .menu-item.active i {
     color: var(--light-blue);
 }
@@ -158,11 +158,12 @@ body {
     display: none;
     position: absolute;
     top: 200px;
-    right: 39px; /* Alinhado com o painel de métricas acima */
+    right: 39px;
+    /* Alinhado com o painel de métricas acima */
     width: 320px;
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     overflow: hidden;
 }
@@ -261,12 +262,13 @@ body {
     display: none;
     position: absolute;
     top: 200px;
-    left: 39px; /* Mesma linha dos outros painéis para não tampar o centro */
+    left: 39px;
+    /* Mesma linha dos outros painéis para não tampar o centro */
     width: 320px;
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 2000;
     border: 1px solid #e1e8ed;
 }
@@ -327,7 +329,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: -2px 2px 6px rgba(0,0,0,0.5);
+    box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.5);
     border: 2px solid white;
     color: white;
 }
@@ -345,20 +347,55 @@ body {
 }
 
 /* Configuração de Cores (Ícones da Legenda e Pinos no Mapa) */
-.icon-car, .marker-car { color: #3498db; }
-.marker-car { background: #3498db; color: white; }
+.icon-car,
+.marker-car {
+    color: #3498db;
+}
 
-.icon-phone, .marker-phone { color: #8e44ad; }
-.marker-phone { background: #8e44ad; color: white; }
+.marker-car {
+    background: #3498db;
+    color: white;
+}
 
-.icon-person, .marker-person { color: #e74c3c; }
-.marker-person { background: #e74c3c; color: white; }
+.icon-phone,
+.marker-phone {
+    color: #8e44ad;
+}
 
-.icon-vandal, .marker-vandal { color: #f39c12; }
-.marker-vandal { background: #f39c12; color: white; }
+.marker-phone {
+    background: #8e44ad;
+    color: white;
+}
 
-.icon-other, .marker-other { color: #27ae60; }
-.marker-other { background: #27ae60; color: white; }
+.icon-person,
+.marker-person {
+    color: #e74c3c;
+}
+
+.marker-person {
+    background: #e74c3c;
+    color: white;
+}
+
+.icon-vandal,
+.marker-vandal {
+    color: #f39c12;
+}
+
+.marker-vandal {
+    background: #f39c12;
+    color: white;
+}
+
+.icon-other,
+.marker-other {
+    color: #27ae60;
+}
+
+.marker-other {
+    background: #27ae60;
+    color: white;
+}
 
 /* ==========================================================================
    BOTÕES FLUTUANTES NO MAPA (Ex: Reposicionar)
@@ -369,14 +406,14 @@ body {
     left: 20px;
     z-index: 1000;
     background-color: whitesmoke;
-    color: #1A73E8; 
-    border: 2px solid rgba(0,0,0,0.1);
+    color: #1A73E8;
+    border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
-    width: 48px;  
-    height: 48px; 
-    font-size: 20px; 
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -385,20 +422,102 @@ body {
 
 .btn-flutuante:hover {
     background-color: #f8f9fa;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
 /* --- BARRA SUPERIOR ARRASTÁVEL (Estilo Janela) --- */
 .drag-header {
     padding: 15px 20px;
-    background-color: #f8f9fa; /* Fundo levemente cinza destacando o cabeçalho */
+    background-color: #f8f9fa;
+    /* Fundo levemente cinza destacando o cabeçalho */
     border-bottom: 1px solid #e1e8ed;
-    border-radius: 8px 8px 0 0; /* Arredonda só os cantos de cima */
-    cursor: grab; /* Mãozinha aberta */
+    border-radius: 8px 8px 0 0;
+    /* Arredonda só os cantos de cima */
+    cursor: grab;
+    /* Mãozinha aberta */
     display: flex;
     align-items: center;
 }
 
 .drag-header:active {
-    cursor: grabbing; /* Mãozinha fechada quando você segura o clique! */
+    cursor: grabbing;
+    /* Mãozinha fechada quando você segura o clique! */
+}
+
+/* Transição suave para não "piscar" na tela */
+body,
+.painel-flutuante,
+.feed-item,
+input,
+select {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* O que acontece quando a classe dark-mode for ativada no body */
+body.dark-mode .painel-flutuante {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    border: 1px solid #333;
+}
+
+body.dark-mode .feed-item {
+    border-bottom: 1px solid #333;
+}
+
+body.dark-mode .feed-texto strong,
+body.dark-mode .feed-details strong {
+    color: #4facfe;
+    /* Um azul neon para destacar os crimes no escuro */
+}
+
+body.dark-mode .feed-data,
+body.dark-mode small {
+    color: #aaaaaa;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+    background-color: #2c2c2c;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+/* [...] Mantenha seus estilos anteriores do .dark-mode que inverteram o feed/modais [...] */
+
+/* Adicione as caixinhas de métricas na lista do Modo Escuro */
+body.dark-mode .painel-flutuante,
+body.dark-mode .metric-card
+
+/* ou a classe que você usou naquelas caixas lá no topo */
+    {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    border: 1px solid #333;
+}
+
+/* Garante que os pinos e o heatmap não sejam invertidos junto com o mapa */
+#map.dark-map-layer .custom-map-pin,
+#map.dark-map-layer .leaflet-heatmap-layer {
+    filter: invert(100%) hue-rotate(-180deg);
+    /* Re-inverte para ficarem com as cores originais */
+}
+
+/* Pinta o fundo do container do mapa para esconder as linhas de grade vazadas */
+body.dark-mode #map {
+    background-color: #242424;
+}
+
+/* Força as caixinhas de métricas a ficarem escuras */
+/* Nota: Se não funcionar, confira no seu HTML qual é o 'class' exato que você usou nessas caixas brancas e substitua o '.caixa-metrica' abaixo pelo nome correto */
+body.dark-mode .painel-flutuante,
+body.dark-mode div[style*="background"],
+body.dark-mode .caixa-metrica {
+    background-color: #1e1e1e !important;
+    color: #f1f1f1 !important;
+    border: 1px solid #333 !important;
+}
+
+body.dark-mode .caixa-metrica span,
+body.dark-mode .caixa-metrica small {
+    color: #aaa !important;
 }
