@@ -1,19 +1,59 @@
-// --- LÓGICA DE POP-UPS FLUTUANTES ---
+// --- LÓGICA DE POP-UPS FLUTUANTES (VERSÃO REVISADA THE HALLS) ---
+
 function alternarPainel(idPainel) {
-    document.querySelectorAll('.painel-flutuante').forEach(painel => {
-        if (painel.id !== idPainel) painel.style.display = 'none';
+    // Fecha todos os outros painéis (exceto o de registro) para não poluir o mapa
+    document.querySelectorAll('.painel-flutuante').forEach(p => {
+        if (p.id !== idPainel && p.id !== 'modal-registro') {
+            p.style.display = 'none';
+        }
     });
 
     const painel = document.getElementById(idPainel);
+
     if (painel.style.display === 'none' || painel.style.display === '') {
+        // RESET DE POSIÇÃO: Apaga as coordenadas do arrasto para ele voltar ao canto esquerdo original
+        if (idPainel === 'painel-filtros') {
+            painel.style.top = "";
+            painel.style.left = "";
+            painel.style.bottom = "20px"; // Garante a âncora no chão
+        }
         painel.style.display = 'block';
     } else {
         painel.style.display = 'none';
     }
 }
 
+function abrirModalRegistro() {
+    const modal = document.getElementById('modal-registro');
+    
+    // Se clicar no menu com ele aberto, ele fecha (comportamento de alternar)
+    if (modal.style.display === 'block') {
+        fecharModal();
+        return;
+    }
+
+    // RESET DE POSIÇÃO: Garante que o registro nasça no lugar certo após ser arrastado
+    modal.style.top = "";
+    modal.style.left = "";
+    modal.style.bottom = "20px";
+    
+    modal.style.display = 'block';
+    
+    // Limpa campos anteriores
+    const inputEndereco = document.getElementById('endereco-input');
+    if(inputEndereco) inputEndereco.value = "";
+}
+
 function fecharPainel(idPainel) {
     document.getElementById(idPainel).style.display = 'none';
+}
+
+function fecharModal() {
+    const modal = document.getElementById('modal-registro');
+    modal.style.display = 'none';
+    if (tempMarker) map.removeLayer(tempMarker);
+    const tipo = document.getElementById('tipo-crime');
+    if (tipo) tipo.selectedIndex = 0;
 }
 
 // --- CONFIGURAÇÃO DO MAPA ---
@@ -35,16 +75,11 @@ document.getElementById('btn-reposicionar').addEventListener('click', function (
     });
 });
 
-// O mapa claro continua normal, tudo em uma imagem só
 var mapaClaro = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-
-// O mapa escuro é a união do "chão" escuro com as "placas" de texto
 var escuroBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
 var escuroTextos = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-
 var mapaEscuro = L.layerGroup([escuroBase, escuroTextos]);
 
-// Inicia o site com o mapa claro
 mapaClaro.addTo(map);
 
 // --- FUNÇÃO DO BOTÃO DE MODO ESCURO ---
@@ -103,58 +138,68 @@ function obterIconePorCrime(tipo) {
     });
 }
 
-// --- LÓGICA DE REGISTRO DE OCORRÊNCIA ---
+// --- LÓGICA DE CLIQUE NO MAPA ---
 map.on('click', function (e) {
     if (tempMarker) map.removeLayer(tempMarker);
     tempMarker = L.marker(e.latlng).addTo(map);
-    document.getElementById('lat-input').value = e.latlng.lat;
-    document.getElementById('lng-input').value = e.latlng.lng;
-    document.getElementById('modal-registro').style.display = 'block';
+    
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    document.getElementById('lat-input').value = lat;
+    document.getElementById('lng-input').value = lng;
+    
+    // Abre o modal de registro na posição inicial
+    abrirModalRegistro();
+
+    document.getElementById('endereco-input').value = "Buscando endereço...";
+
+    const urlReverse = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+
+    fetch(urlReverse)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.address) {
+                const detalhes = data.address;
+                const distrito = detalhes.suburb || detalhes.city_district || detalhes.neighbourhood || detalhes.town || "Desconhecido";
+                document.getElementById('distrito-input').value = distrito;
+                
+                const rua = detalhes.road || "Rua não identificada";
+                const numero = detalhes.house_number ? `, ${detalhes.house_number}` : "";
+                const enderecoCompleto = rua + numero;
+
+                document.getElementById('endereco-input').value = enderecoCompleto;
+            }
+        })
+        .catch(error => console.error("Erro no clique:", error));
 });
 
-function abrirModalRegistro() {
-    document.getElementById('modal-registro').style.display = 'block';
-    document.getElementById('endereco-input').value = "";
-}
-
 function buscarEndereco() {
-    const endereco = document.getElementById('endereco-input').value;
-    if (!endereco) {
-        alert("Por favor, digite um endereço para buscar.");
-        return;
-    }
+    const inputElement = document.getElementById('endereco-input');
+    const endereco = inputElement.value;
+    if (!endereco) return;
 
-    const query = `${endereco}, São Paulo, SP, Brasil`;
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${endereco}, São Paulo&addressdetails=1`;
 
     fetch(url)
         .then(response => response.json())
         .then(data => {
             if (data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lng = parseFloat(data[0].lon);
-
+                const lat = data[0].lat;
+                const lon = data[0].lon;
+                const detalhes = data[0].address;
+                const distrito = detalhes.suburb || detalhes.city_district || detalhes.neighbourhood || detalhes.town || "Desconhecido";
+                
+                document.getElementById('distrito-input').value = distrito;
                 document.getElementById('lat-input').value = lat;
-                document.getElementById('lng-input').value = lng;
+                document.getElementById('lng-input').value = lon;
 
-                map.flyTo([lat, lng], 17);
-
+                map.flyTo([lat, lon], 17, { animate: true, duration: 1.5 });
+                
                 if (tempMarker) map.removeLayer(tempMarker);
-                tempMarker = L.marker([lat, lng]).addTo(map);
-            } else {
-                alert("Endereço não encontrado. Tente digitar de outra forma (Ex: Rua Augusta, Bela Vista).");
+                tempMarker = L.marker([lat, lon]).addTo(map);
             }
-        })
-        .catch(error => {
-            console.error("Erro na busca de endereço:", error);
-            alert("Erro ao buscar o endereço. Verifique sua conexão.");
         });
-}
-
-function fecharModal() {
-    document.getElementById('modal-registro').style.display = 'none';
-    document.getElementById('tipo-crime').selectedIndex = 0;
-    if (tempMarker) map.removeLayer(tempMarker);
 }
 
 function enviarRegistro() {
@@ -162,23 +207,12 @@ function enviarRegistro() {
     const lat = document.getElementById('lat-input').value;
     const lng = document.getElementById('lng-input').value;
     const dataHoraRaw = document.getElementById('data-hora-input').value;
+    const distrito = document.getElementById('distrito-input').value;
 
-    if (!tipo || !dataHoraRaw) { 
-        alert("Por favor, preencha o tipo de crime e o horário."); 
+    if (!tipo || !dataHoraRaw || !lat || !lng) { 
+        alert("Preencha todos os campos."); 
         return; 
     }
-
-    // --- NOVA TRAVA DE SEGURANÇA DO ANO ---
-    // Recorta os 4 primeiros caracteres da data (o ano) e transforma em número
-    const anoDigitado = parseInt(dataHoraRaw.substring(0, 4));
-    const anoAtual = new Date().getFullYear(); // Pega o ano atual automaticamente (2026)
-
-    // Se o ano for menor que 2000 ou maior que o ano atual, barra o registro!
-    if (anoDigitado < 2000 || anoDigitado > anoAtual) {
-        alert(`Por favor, insira um ano válido (entre 2000 e ${anoAtual}).`);
-        return;
-    }
-    // --------------------------------------
 
     const dataHoraFormatada = dataHoraRaw.replace('T', ' ') + ':00';
     
@@ -186,10 +220,8 @@ function enviarRegistro() {
         method: 'POST', 
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ 
-            tipo: tipo, 
-            lat: parseFloat(lat), 
-            lng: parseFloat(lng),
-            data_hora: dataHoraFormatada 
+            tipo: tipo, lat: parseFloat(lat), lng: parseFloat(lng),
+            data_hora: dataHoraFormatada, distrito: distrito
         })
     }).then(() => {
         fecharModal(); 
@@ -198,25 +230,32 @@ function enviarRegistro() {
     });
 }
 
-// DICA: No objeto 'options' do seu Chart.js, adicione isto para não cortar:
-// maintainAspectRatio: false,
-// layout: { padding: { right: 20, bottom: 20 } }
-
-// --- FUNÇÃO PARA TORNAR JANELAS ARRASTÁVEIS ---
+// --- FUNÇÃO PARA TORNAR JANELAS ARRASTÁVEIS (VERSÃO BLINDADA) ---
 function tornarArrastavel(idModal, idCabecalho) {
     const modal = document.getElementById(idModal);
     const cabecalho = document.getElementById(idCabecalho);
-
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
+    cabecalho.style.cursor = 'grab';
     cabecalho.onmousedown = iniciarArrasto;
 
     function iniciarArrasto(e) {
         e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;
+
+        // SEGREDO: Salva a posição ANTES de mudar a âncora
+        let topoFixo = modal.offsetTop;
+        let esquerdaFixa = modal.offsetLeft;
+
+        modal.style.bottom = 'auto';
+        modal.style.top = topoFixo + "px";
+        modal.style.left = esquerdaFixa + "px";
+
         document.onmouseup = pararArrasto;
         document.onmousemove = arrastarElemento;
+        cabecalho.style.cursor = 'grabbing';
+        document.body.style.cursor = 'grabbing';
     }
 
     function arrastarElemento(e) {
@@ -225,10 +264,6 @@ function tornarArrastavel(idModal, idCabecalho) {
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-
-        modal.style.right = 'auto';
-        modal.style.bottom = 'auto';
-
         modal.style.top = (modal.offsetTop - pos2) + "px";
         modal.style.left = (modal.offsetLeft - pos1) + "px";
     }
@@ -236,22 +271,32 @@ function tornarArrastavel(idModal, idCabecalho) {
     function pararArrasto() {
         document.onmouseup = null;
         document.onmousemove = null;
+        cabecalho.style.cursor = 'grab';
+        document.body.style.cursor = 'default';
     }
 }
 
+// Inicia os arrastos
 tornarArrastavel('modal-registro', 'cabecalho-registro');
+tornarArrastavel('painel-filtros', 'cabecalho-filtros');
 
 // --- ATUALIZAÇÃO DA INTERFACE E FEED ---
 function atualizarInterface() {
-    fetch('/dados').then(res => res.json()).then(pontos => {
-        markerGroup.clearLayers();
+    const filtroDropdown = document.getElementById('filtro-tipo');
+    const tipoSelecionado = filtroDropdown ? filtroDropdown.value : 'Todos';
 
+    let url = '/dados';
+    if (tipoSelecionado !== 'Todos') {
+        url = `/dados?tipo=${encodeURIComponent(tipoSelecionado)}`;
+    }
+
+    fetch(url).then(res => res.json()).then(pontos => {
+        markerGroup.clearLayers();
         const coordsCalor = pontos.map(p => [p.lat, p.lng]);
         heatLayer.setLatLngs(coordsCalor);
 
         const lista = document.getElementById('feed-lista');
         lista.innerHTML = "";
-
         const contagemCrimes = {};
         let crimeMaisFrequente = "--";
         let maxOcorrencias = 0;
@@ -263,28 +308,20 @@ function atualizarInterface() {
                 crimeMaisFrequente = p.tipo;
             }
 
-            // Removi o ID do pop-up do mapa também para ficar mais limpo
             L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
                 .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`)
                 .addTo(markerGroup);
 
             if (index < 10) {
-                // Nova Lógica de Data
                 let partes = p.data_hora.split(" ");
                 let dataPartes = partes[0].split("-");
                 let horaPartes = partes[1].split(":");
-                let dataFormatada = `${dataPartes[2]}/${dataPartes[1]}/${dataPartes[0]} às ${horaPartes[0]}:${horaPartes[1]}`;
-
-                // HTML do Feed limpo, sem o ID
+                let dataF = `${dataPartes[2]}/${dataPartes[1]}/${dataPartes[0]} às ${horaPartes[0]}:${horaPartes[1]}`;
                 lista.innerHTML += `
                     <div class="feed-item">
                         <i class="fas fa-map-marker-alt"></i>
-                        <div class="feed-details">
-                            <strong>${p.tipo}</strong><br>
-                            <small>${dataFormatada}</small>
-                        </div>
-                    </div>
-                `;
+                        <div class="feed-details"><strong>${p.tipo}</strong><br><small>${dataF}</small></div>
+                    </div>`;
             }
         });
 
@@ -295,64 +332,24 @@ function atualizarInterface() {
 
 atualizarInterface();
 
-// --- LÓGICA DO GRÁFICO (Chart.js) ---
+// --- LÓGICA DO GRÁFICO ---
 let graficoInstancia = null;
-
 function carregarGrafico() {
-    fetch('/estatisticas/horarios')
-        .then(res => res.json())
-        .then(dados => {
-            let labels = [];
-            let valores = [];
-
-            // Cria um loop para as 24 horas do dia (00h até 23h)
-            for (let i = 0; i < 24; i++) {
-                // Formata o número para ter sempre dois dígitos (ex: "09")
-                let horaFormatada = i.toString().padStart(2, '0');
-                labels.push(horaFormatada + 'h');
-
-                // Se existir crime nessa hora, pega o valor, se não, é 0
-                valores.push(dados[horaFormatada] || 0);
-            }
-
-            const ctx = document.getElementById('graficoHorarios').getContext('2d');
-
-            // Destrói o gráfico anterior antes de desenhar um novo (evita bugar se clicar várias vezes)
-            if (graficoInstancia) {
-                graficoInstancia.destroy();
-            }
-
-            // Desenha o novo gráfico
-            graficoInstancia = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Número de Ocorrências',
-                        data: valores,
-                        backgroundColor: 'rgba(41, 128, 185, 0.8)', // Azul do seu layout
-                        borderColor: 'rgba(41, 128, 185, 1)',
-                        borderWidth: 1,
-                        borderRadius: 4 // Deixa as pontas das barras arredondadas
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1 // Força o eixo Y a contar apenas números inteiros (1, 2, 3...)
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false } // Esconde a legenda para ficar mais limpo
-                    }
-                }
-            });
-        })
-        .catch(error => {
-            console.error("Erro ao carregar os dados do gráfico:", error);
+    fetch('/estatisticas/horarios').then(res => res.json()).then(dados => {
+        let labels = []; let valores = [];
+        for (let i = 0; i < 24; i++) {
+            let h = i.toString().padStart(2, '0');
+            labels.push(h + 'h'); valores.push(dados[h] || 0);
+        }
+        const ctx = document.getElementById('graficoHorarios').getContext('2d');
+        if (graficoInstancia) graficoInstancia.destroy();
+        graficoInstancia = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ label: 'Ocorrências', data: valores, backgroundColor: '#2980b9' }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
         });
+    });
 }

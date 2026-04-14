@@ -9,7 +9,7 @@ cursor = conn.cursor()
 id_para_apagar = 1
 # ---------------------------------------------------------
 
-# Comando SQL para deletar a linha específica
+# Comando SQL para deletar a ocorrência específica
 cursor.execute("DELETE FROM ocorrencias WHERE id = ?", (id_para_apagar,))
 
 # Salva e fecha

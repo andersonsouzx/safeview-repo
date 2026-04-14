@@ -2,6 +2,11 @@ from flask import Flask, render_template, request, jsonify
 import sqlite3
 from datetime import datetime
 
+def get_db_connection():
+    conn = sqlite3.connect('sibo.db')
+    conn.row_factory = sqlite3.Row  # Isso permite acessar as colunas pelo nome (ex: linha['distrito'])
+    return conn
+
 app = Flask(__name__)
 
 # 1. Configuração do Banco de Dados com Carga Inicial
@@ -43,72 +48,55 @@ def index():
 # 3. Rota para Receber as Ocorrências (AGORA BLINDADA)
 @app.route('/registrar', methods=['POST'])
 def registrar():
-    data = request.json
-    # ... mantenha suas travas de segurança aqui ...
+    data = request.get_json()
+    tipo = data['tipo']
+    lat = data['lat']
+    lng = data['lng']
+    data_hora = data['data_hora']
+    distrito = data.get('distrito', 'Desconhecido') # Captura o distrito
 
-    # Pega a data enviada pelo seu novo input
-    data_hora = data.get('data_hora')
-    
-    conn = sqlite3.connect('sibo.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)",
-                   (data['tipo'], data.get('lat'), data.get('lng'), data_hora))
+    conn = get_db_connection()
+    # Adiciona o distrito no INSERT
+    conn.execute('INSERT INTO ocorrencias (tipo, lat, lng, data_hora, distrito) VALUES (?, ?, ?, ?, ?)',
+                 (tipo, lat, lng, data_hora, distrito))
     conn.commit()
     conn.close()
-    
-    return jsonify({"status": "sucesso"})
-    
-    # --- 1. TRAVA DE SEGURANÇA: Tipos de Crime ---
-    # Só aceita o que estiver exatamente nesta lista (bloqueia scripts HTML/JS)
-    tipos_permitidos = [
-        "Roubo a Pedestre (com ameaça)",
-        "Furto a Pedestre (sem violência)",
-        "Roubo de Veículo",
-        "Furto de Veículo",
-        "Agressão Física",
-        "Vandalismo / Dano ao Patrimônio",
-        "Tráfico de Drogas",
-        "Atividade Suspeita",
-        "Perturbação do Sossego"
-    ]
-    
-    if data.get('tipo') not in tipos_permitidos:
-        # Se o invasor mandar algo fora da lista, o servidor devolve um erro 400 (Bad Request)
-        return jsonify({"status": "erro", "mensagem": "Tipo de ocorrência inválido ou não autorizado."}), 400
 
-    # --- 2. TRAVA DE SEGURANÇA: Coordenadas ---
-    # Garante que Latitude e Longitude são números reais, e não textos maliciosos
-    try:
-        lat = float(data.get('lat'))
-        lng = float(data.get('lng'))
-    except (ValueError, TypeError):
-        return jsonify({"status": "erro", "mensagem": "Coordenadas geográficas inválidas."}), 400
-
-    # Se passou pelas duas travas de segurança, o dado é limpo e seguro para salvar!
-    agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    conn = sqlite3.connect('sibo.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO ocorrencias (tipo, lat, lng, data_hora) VALUES (?, ?, ?, ?)",
-                   (data['tipo'], lat, lng, agora))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({"status": "sucesso", "mensagem": "Ocorrência registrada com segurança!"})
+    return jsonify({'status': 'sucesso'})
 
 # 4. Rota para Alimentar o Mapa e o Feed (AGORA COM O ID)
 @app.route('/dados')
 def dados():
-    conn = sqlite3.connect('sibo.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
-    # Pega todos os registros INCLUINDO O ID
-    cursor.execute("SELECT id, tipo, lat, lng, data_hora FROM ocorrencias ORDER BY id DESC")
-    registros = cursor.fetchall()
-    conn.close()
     
-    # Formata os dados enviando o ID para o JavaScript
-    pontos = [{"id": r[0], "tipo": r[1], "lat": r[2], "lng": r[3], "data_hora": r[4]} for r in registros]
-    return jsonify(pontos)
+    # 1. O "pulo do gato": lendo a carta que o JavaScript enviou
+    tipo_filtro = request.args.get('tipo')
+
+    # 2. A inteligência do filtro no Banco de Dados
+    if tipo_filtro and tipo_filtro != 'Todos':
+        # Se tem um filtro específico, usa o WHERE para buscar só aquele crime
+        cursor.execute('SELECT * FROM ocorrencias WHERE tipo = ?', (tipo_filtro,))
+    else:
+        # Se for "Todos" ou a página acabou de carregar, puxa tudo
+        cursor.execute('SELECT * FROM ocorrencias')
+        
+    ocorrencias = cursor.fetchall()
+    conn.close()
+
+    # 3. Montando o pacote para devolver ao mapa
+    dados_formatados = []
+    for linha in ocorrencias:
+        dados_formatados.append({
+            'id': linha['id'],
+            'tipo': linha['tipo'],
+            'lat': linha['lat'],
+            'lng': linha['lng'],
+            'data_hora': linha['data_hora'],
+            'distrito': linha['distrito'] # Garantindo que o distrito desça pro front
+        })
+
+    return jsonify(dados_formatados)
 
 # 5. Rota para Alimentar o Gráfico de Horários
 @app.route('/estatisticas/horarios')
