@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 </head>
 
 <body>
@@ -93,7 +96,7 @@
             </div>
         </div>
 
-        <div id="painel-filtros" class="painel-flutuante" style="display: none; position: absolute; top: 400px; left: 40px; width: 300px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
+        <div id="painel-filtros" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
             
             <div id="cabecalho-filtros" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-filter"></i> Filtrar Ocorrências</h3>
@@ -101,7 +104,7 @@
             </div>
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Macro-Região:</label>
-            <select id="filtro-zona" onchange="atualizarInterface()" style="width: 100%; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
+            <select id="filtro-zona" onchange="atualizarInterface()" style="width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="Todas">Todas as Zonas</option>
                 <option value="Norte">Zona Norte</option>
                 <option value="Sul">Zona Sul</option>
@@ -111,10 +114,10 @@
             </select>
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito / Bairro:</label>
-            <input type="text" id="filtro-distrito" placeholder="Ex: Santana, Consolação..." oninput="atualizarInterface()" style="width: 100%; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; box-sizing: border-box;">
+            <input type="text" id="filtro-distrito" placeholder="Ex: Santana, Consolação..." oninput="atualizarInterface()" style="width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Tipo de Ocorrência:</label>
-            <select id="filtro-tipo" onchange="atualizarInterface()" style="width: 100%; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
+            <select id="filtro-tipo" onchange="atualizarInterface()" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="Todos">Todos os Registros</option>
                 <option value="Roubo a Pedestre (com ameaça)">Roubo a Pedestre (com ameaça)</option>
                 <option value="Furto a Pedestre (sem violência)">Furto a Pedestre (sem violência)</option>
@@ -128,7 +131,7 @@
             </select>
         </div>
 
-        <div id="modal-registro" class="painel-flutuante" style="display: none; position: absolute; top: 80px; left: 270px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
+        <div id="modal-registro" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
             
             <div id="cabecalho-registro" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-plus-circle"></i> Registrar Ocorrência</h3>

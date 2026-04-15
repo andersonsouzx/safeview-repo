@@ -1,51 +1,50 @@
-// --- LÓGICA DE POP-UPS FLUTUANTES (VERSÃO REVISADA THE HALLS) ---
+// --- LÓGICA DE POP-UPS FLUTUANTES (VERSÃO EXCLUSIVA THE HALLS) ---
 
 function alternarPainel(idPainel) {
-    // Fecha todos os outros painéis (exceto o de registro) para não poluir o mapa
-    document.querySelectorAll('.painel-flutuante').forEach(p => {
-        if (p.id !== idPainel && p.id !== 'modal-registro') {
-            p.style.display = 'none';
-        }
-    });
-
     const painel = document.getElementById(idPainel);
 
-    if (painel.style.display === 'none' || painel.style.display === '') {
-        // RESET DE POSIÇÃO: Apaga as coordenadas do arrasto para ele voltar ao canto esquerdo original
-        if (idPainel === 'painel-filtros') {
-            painel.style.top = "";
-            painel.style.left = "";
-            painel.style.bottom = "20px"; // Garante a âncora no chão
-        }
-        painel.style.display = 'block';
-    } else {
+    // Se o painel já estiver aberto, apenas fecha e sai
+    if (painel.style.display === 'block') {
         painel.style.display = 'none';
+        return;
     }
+
+    // 1. FECHA TUDO: Antes de abrir um, limpamos a tela de todos os outros (inclusive o registro)
+    document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
+
+    // 2. RESET DE POSIÇÃO DINÂMICO
+    if (idPainel === 'painel-filtros') {
+        painel.style.left = "auto"; 
+        painel.style.right = "39px"; // Lado direito para visualização
+        painel.style.top = "200px";
+        painel.style.bottom = "auto";
+    }
+
+    painel.style.display = 'block';
 }
 
 function abrirModalRegistro() {
     const modal = document.getElementById('modal-registro');
     
-    // Se clicar no menu com ele aberto, ele fecha (comportamento de alternar)
+    // Se clicar no menu com ele aberto, ele fecha
     if (modal.style.display === 'block') {
         fecharModal();
         return;
     }
 
-    // RESET DE POSIÇÃO: Garante que o registro nasça no lugar certo após ser arrastado
-    modal.style.top = "";
-    modal.style.left = "";
-    modal.style.bottom = "20px";
+    // 1. FECHA TUDO: Garante que filtros, feed ou gráficos sumam para dar foco ao registro
+    document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
+
+    // 2. POSICIONAMENTO À ESQUERDA: Diferenciando a ação de registro
+    modal.style.right = "auto";
+    modal.style.left = "30px"; // Colado na sidebar
+    modal.style.bottom = "100px";
+    modal.style.top = "auto";
     
     modal.style.display = 'block';
     
-    // Limpa campos anteriores
     const inputEndereco = document.getElementById('endereco-input');
     if(inputEndereco) inputEndereco.value = "";
-}
-
-function fecharPainel(idPainel) {
-    document.getElementById(idPainel).style.display = 'none';
 }
 
 function fecharModal() {
@@ -203,30 +202,22 @@ function buscarEndereco() {
 }
 
 function enviarRegistro() {
-    const tipo = document.getElementById('tipo-crime').value;
-    const lat = document.getElementById('lat-input').value;
-    const lng = document.getElementById('lng-input').value;
-    const dataHoraRaw = document.getElementById('data-hora-input').value;
-    const distrito = document.getElementById('distrito-input').value;
+    // ... outras variáveis ...
+    const zona = document.getElementById('zona-crime').value; // Puxa a zona do novo select
 
-    if (!tipo || !dataHoraRaw || !lat || !lng) { 
-        alert("Preencha todos os campos."); 
-        return; 
-    }
-
-    const dataHoraFormatada = dataHoraRaw.replace('T', ' ') + ':00';
-    
     fetch('/registrar', {
         method: 'POST', 
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ 
-            tipo: tipo, lat: parseFloat(lat), lng: parseFloat(lng),
-            data_hora: dataHoraFormatada, distrito: distrito
+            tipo: tipo, 
+            lat: parseFloat(lat), 
+            lng: parseFloat(lng),
+            data_hora: dataHoraFormatada, 
+            distrito: distrito, 
+            zona: zona // Envia a zona para o Python
         })
     }).then(() => {
-        fecharModal(); 
-        atualizarInterface();
-        if(document.getElementById('popup-grafico').style.display === 'block') carregarGrafico();
+        // ... resto da função ...
     });
 }
 
@@ -282,21 +273,30 @@ tornarArrastavel('painel-filtros', 'cabecalho-filtros');
 
 // --- ATUALIZAÇÃO DA INTERFACE E FEED ---
 function atualizarInterface() {
-    const filtroDropdown = document.getElementById('filtro-tipo');
-    const tipoSelecionado = filtroDropdown ? filtroDropdown.value : 'Todos';
+    // 1. Lê os 3 filtros lá do painel HTML
+    const tipoSelecionado = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
+    const zonaSelecionada = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
+    const distritoDigitado = document.getElementById('filtro-distrito') ? document.getElementById('filtro-distrito').value : '';
 
-    let url = '/dados';
-    if (tipoSelecionado !== 'Todos') {
-        url = `/dados?tipo=${encodeURIComponent(tipoSelecionado)}`;
-    }
+    // 2. Monta a rota para o Flask com os parâmetros inteligentes
+    const params = new URLSearchParams();
+    if (tipoSelecionado !== 'Todos') params.append('tipo', tipoSelecionado);
+    if (zonaSelecionada !== 'Todas') params.append('zona', zonaSelecionada);
+    if (distritoDigitado.trim() !== '') params.append('distrito', distritoDigitado.trim());
 
+    // A URL final vai ficar algo como: /dados?tipo=Roubo&distrito=Santana
+    const url = `/dados?${params.toString()}`;
+
+    // 3. Pede os dados filtrados e atualiza o mapa e o feed
     fetch(url).then(res => res.json()).then(pontos => {
         markerGroup.clearLayers();
+        
         const coordsCalor = pontos.map(p => [p.lat, p.lng]);
         heatLayer.setLatLngs(coordsCalor);
 
         const lista = document.getElementById('feed-lista');
         lista.innerHTML = "";
+        
         const contagemCrimes = {};
         let crimeMaisFrequente = "--";
         let maxOcorrencias = 0;
@@ -327,7 +327,7 @@ function atualizarInterface() {
 
         document.getElementById('metric-total').innerText = pontos.length;
         document.getElementById('metric-frequent').innerText = crimeMaisFrequente;
-    });
+    }).catch(error => console.error("Erro ao atualizar interface:", error));
 }
 
 atualizarInterface();
