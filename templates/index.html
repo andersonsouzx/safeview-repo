@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 </head>
 
 <body>
@@ -114,9 +113,12 @@
             </select>
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito / Bairro:</label>
-            <input type="text" id="filtro-distrito" placeholder="Ex: Santana, Consolação..." oninput="atualizarInterface()" style="width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
+            
+            <div style="position: relative; z-index: 100;">
+                <input type="text" id="filtro-distrito" placeholder="Digite o distrito..." style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
+            </div>
 
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Tipo de Ocorrência:</label>
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-top: 12px; margin-bottom: 3px;">Tipo de Ocorrência:</label>
             <select id="filtro-tipo" onchange="atualizarInterface()" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="Todos">Todos os Registros</option>
                 <option value="Roubo a Pedestre (com ameaça)">Roubo a Pedestre (com ameaça)</option>
@@ -178,7 +180,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

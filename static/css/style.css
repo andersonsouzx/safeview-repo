@@ -168,6 +168,7 @@ body {
     overflow: hidden;
     border: 1px solid #34495e;
     box-sizing: border-box;   /* Essencial para o preenchimento não esticar a largura */
+    z-index: 9999 !important;
 }
 
 .cabecalho-painel {
@@ -453,6 +454,7 @@ select {
     margin-bottom: 3px;
 }
 
+
 /* O que acontece quando a classe dark-mode for ativada no body */
 body.dark-mode .painel-flutuante {
     background-color: #1e1e1e;
@@ -512,4 +514,75 @@ body.dark-mode .caixa-metrica {
 body.dark-mode .caixa-metrica span,
 body.dark-mode .caixa-metrica small {
     color: #aaa !important;
+}
+
+/* ==========================================================================
+   ESTILO DOS AGRUPAMENTOS (CLUSTERS DE PINOS)
+   ========================================================================== */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+    background-color: rgba(44, 62, 80, 0.5) !important; /* Fundo var(--mid-blue) translúcido */
+    border-radius: 50%;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+    background-color: #3498db !important; /* Cor var(--light-blue) */
+    color: white !important;
+    border: 2px solid #1a252f !important; /* Borda escura var(--dark-blue) */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+    transition: all 0.3s ease;
+}
+
+/* Efeito ao passar o mouse por cima do grupo */
+.marker-cluster:hover div {
+    background-color: #2980b9 !important;
+    transform: scale(1.1);
+}
+
+/* ==========================================================================
+   AUTOCOMPLETE CUSTOMIZADO (SUGESTÕES DE DISTRITOS)
+   ========================================================================== */
+.autocomplete-items {
+    position: absolute;
+    z-index: 9999;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-light);
+    border: 1px solid var(--mid-blue);
+    border-radius: 0 0 5px 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+}
+
+/* Regras para o Tema Escuro (Dark Mode) */
+body.dark-mode .autocomplete-items {
+    background-color: var(--dark-blue);
+    border-color: #333;
+}
+
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--dark-blue);
+    border-bottom: 1px solid #ccc;
+}
+
+body.dark-mode .autocomplete-items div {
+    color: var(--text-light);
+    border-bottom-color: #444;
+}
+
+/* Efeito ao passar o mouse */
+.autocomplete-items div:hover {
+    background-color: var(--light-blue);
+    color: white;
 }
