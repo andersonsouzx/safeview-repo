@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div id="painel-filtros" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
+        <div id="painel-filtros" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box; overflow: visible !important;">
             
             <div id="cabecalho-filtros" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-filter"></i> Filtrar Ocorrências</h3>
@@ -111,11 +111,12 @@
                 <option value="Oeste">Zona Oeste</option>
                 <option value="Centro">Centro</option>
             </select>
-
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito / Bairro:</label>
             
-            <div style="position: relative; z-index: 100;">
-                <input type="text" id="filtro-distrito" placeholder="Digite o distrito..." style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito / Bairro:</label>
+            <div style="position: relative; z-index: 100; display: flex; align-items: center;">
+                <input type="text" id="filtro-distrito" placeholder="Digite o distrito..." style="width: 100%; box-sizing: border-box; padding: 8px; padding-right: 30px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
+                
+                <i class="fas fa-times" id="btn-limpar-distrito" style="position: absolute; right: 10px; z-index: 101; color: #95a5a6; cursor: pointer; display: none;" title="Limpar busca"></i>
             </div>
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-top: 12px; margin-bottom: 3px;">Tipo de Ocorrência:</label>

@@ -1,4 +1,4 @@
-// --- LÓGICA DE POP-UPS FLUTUANTES (VERSÃO EXCLUSIVA THE HALLS) ---
+// --- LÓGICA DE POP-UPS FLUTUANTES ---
 function alternarPainel(idPainel) {
     const painel = document.getElementById(idPainel);
     if (painel.style.display === 'block') {
@@ -6,13 +6,12 @@ function alternarPainel(idPainel) {
         return;
     }
     document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
-    if (idPainel === 'painel-filtros') {
-        painel.style.left = "auto"; 
-        painel.style.right = "39px";
-        painel.style.top = "200px";
-        painel.style.bottom = "auto";
-    }
     painel.style.display = 'block';
+}
+
+function fecharPainel(idPainel) {
+    const painel = document.getElementById(idPainel);
+    if (painel) painel.style.display = 'none';
 }
 
 function abrirModalRegistro() {
@@ -22,10 +21,6 @@ function abrirModalRegistro() {
         return;
     }
     document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
-    modal.style.right = "auto";
-    modal.style.left = "30px"; 
-    modal.style.bottom = "100px";
-    modal.style.top = "auto";
     modal.style.display = 'block';
     
     const inputEndereco = document.getElementById('endereco-input');
@@ -59,7 +54,7 @@ var mapaEscuro = L.layerGroup([escuroBase, escuroTextos]);
 
 mapaClaro.addTo(map);
 
-// --- FUNÇÃO DO BOTÃO DE MODO ESCURO ---
+// --- FUNÇÃO DO MODO ESCURO ---
 let modoEscuroAtivo = false;
 function alternarTema() {
     modoEscuroAtivo = !modoEscuroAtivo;
@@ -82,11 +77,7 @@ function alternarTema() {
 
 // --- CAMADAS DE DADOS (CLUSTERS E PINOS) ---
 var markerGroup = L.markerClusterGroup({
-    maxClusterRadius: function(zoom) {
-        if (zoom <= 11) return 1000;
-        if (zoom <= 13) return 250; 
-        return 80;                  
-    },
+    maxClusterRadius: (zoom) => zoom <= 11 ? 1000 : zoom <= 13 ? 250 : 80,
     disableClusteringAtZoom: 15,
     chunkedLoading: true,
     spiderfyOnMaxZoom: false
@@ -114,298 +105,198 @@ function obterIconePorCrime(tipo) {
 map.on('click', function (e) {
     if (tempMarker) map.removeLayer(tempMarker);
     tempMarker = L.marker(e.latlng).addTo(map);
-    
-    const lat = e.latlng.lat;
-    const lng = e.latlng.lng;
-    document.getElementById('lat-input').value = lat;
-    document.getElementById('lng-input').value = lng;
-    
+    document.getElementById('lat-input').value = e.latlng.lat;
+    document.getElementById('lng-input').value = e.latlng.lng;
     abrirModalRegistro();
     document.getElementById('endereco-input').value = "Buscando endereço...";
 
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-        .then(response => response.json())
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&zoom=18&addressdetails=1`)
+        .then(res => res.json())
         .then(data => {
             if (data && data.address) {
-                const detalhes = data.address;
-                const distrito = detalhes.suburb || detalhes.city_district || detalhes.neighbourhood || detalhes.town || "Desconhecido";
+                const d = data.address;
+                const distrito = d.suburb || d.city_district || d.neighbourhood || "Desconhecido";
                 document.getElementById('distrito-input').value = distrito;
-                const rua = detalhes.road || "Rua não identificada";
-                const numero = detalhes.house_number ? `, ${detalhes.house_number}` : "";
-                document.getElementById('endereco-input').value = rua + numero;
-            }
-        }).catch(error => console.error("Erro no clique:", error));
-});
-
-function buscarEndereco() {
-    const inputElement = document.getElementById('endereco-input');
-    const endereco = inputElement.value;
-    if (!endereco) return;
-
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${endereco}, São Paulo&addressdetails=1`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.length > 0) {
-                const lat = data[0].lat;
-                const lon = data[0].lon;
-                const detalhes = data[0].address;
-                const distrito = detalhes.suburb || detalhes.city_district || detalhes.neighbourhood || detalhes.town || "Desconhecido";
-                
-                document.getElementById('distrito-input').value = distrito;
-                document.getElementById('lat-input').value = lat;
-                document.getElementById('lng-input').value = lon;
-
-                map.flyTo([lat, lon], 17, { animate: true, duration: 1.5 });
-                if (tempMarker) map.removeLayer(tempMarker);
-                tempMarker = L.marker([lat, lon]).addTo(map);
+                document.getElementById('endereco-input').value = (d.road || "Rua não identificada") + (d.house_number ? `, ${d.house_number}` : "");
             }
         });
-}
-
-// --- RESTAURANDO A FUNÇÃO DE ENVIAR REGISTRO ---
-function enviarRegistro() {
-    const tipo = document.getElementById('tipo-crime') ? document.getElementById('tipo-crime').value : "Desconhecido";
-    const lat = document.getElementById('lat-input').value;
-    const lng = document.getElementById('lng-input').value;
-    const distrito = document.getElementById('distrito-input').value;
-    const zona = document.getElementById('zona-crime') ? document.getElementById('zona-crime').value : "Todas";
-    
-    // Gera a data atual no formato YYYY-MM-DD HH:MM para salvar no banco
-    const agora = new Date();
-    const dataHoraFormatada = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')} ${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
-
-    fetch('/registrar', {
-        method: 'POST', 
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ 
-            tipo: tipo, 
-            lat: parseFloat(lat), 
-            lng: parseFloat(lng),
-            data_hora: dataHoraFormatada, 
-            distrito: distrito, 
-            zona: zona
-        })
-    }).then(() => {
-        fecharModal();
-        atualizarInterface();
-        if (typeof carregarGrafico === "function") carregarGrafico();
-    }).catch(error => console.error("Erro ao registrar:", error));
-}
-
-// --- JANELAS ARRASTÁVEIS ---
-function tornarArrastavel(idModal, idCabecalho) {
-    const modal = document.getElementById(idModal);
-    const cabecalho = document.getElementById(idCabecalho);
-    if(!modal || !cabecalho) return; // Proteção extra
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    cabecalho.style.cursor = 'grab';
-    cabecalho.onmousedown = function(e) {
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        let topoFixo = modal.offsetTop;
-        let esquerdaFixa = modal.offsetLeft;
-        modal.style.bottom = 'auto';
-        modal.style.top = topoFixo + "px";
-        modal.style.left = esquerdaFixa + "px";
-        document.onmouseup = pararArrasto;
-        document.onmousemove = arrastarElemento;
-        cabecalho.style.cursor = 'grabbing';
-        document.body.style.cursor = 'grabbing';
-    };
-
-    function arrastarElemento(e) {
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        modal.style.top = (modal.offsetTop - pos2) + "px";
-        modal.style.left = (modal.offsetLeft - pos1) + "px";
-    }
-
-    function pararArrasto() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-        cabecalho.style.cursor = 'grab';
-        document.body.style.cursor = 'default';
-    }
-}
-tornarArrastavel('modal-registro', 'cabecalho-registro');
-tornarArrastavel('painel-filtros', 'cabecalho-filtros');
+});
 
 // ====================================================================
-// AUTOCOMPLETE CUSTOMIZADO E UTILITÁRIOS
+// AUTOCOMPLETE CUSTOMIZADO E UTILITÁRIOS (COM BOTÃO X E TECLADO)
 // ====================================================================
 function removerAcentos(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function formatarNome(nome) {
+    return nome.toLowerCase().replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
 }
 
 let listaDistritosOficiais = [];
 fetch('https://raw.githubusercontent.com/codigourbano/distritos-sp/master/distritos-sp.geojson')
     .then(res => res.json())
     .then(geoData => {
-        const nomes = geoData.features.map(f => f.properties.ds_nome || f.properties.NOME || f.properties.name || "");
+        const nomes = geoData.features.map(f => f.properties.ds_nome || f.properties.NOME || "");
         listaDistritosOficiais = [...new Set(nomes)].filter(n => n !== "").map(n => n.trim()).sort();
     });
 
 const inputDistrito = document.getElementById('filtro-distrito');
+const btnLimparDistrito = document.getElementById('btn-limpar-distrito'); // Puxa o botão X do HTML
+
 if (inputDistrito) {
     inputDistrito.removeAttribute('list'); 
     const caixaSugestoes = document.createElement('div');
     caixaSugestoes.setAttribute('class', 'autocomplete-items');
-    inputDistrito.parentNode.style.position = 'relative';
     inputDistrito.parentNode.appendChild(caixaSugestoes);
+
+    let focoAtual = -1;
+
+    // Ação 1: Clicar no botão X
+    if (btnLimparDistrito) {
+        btnLimparDistrito.addEventListener('click', function() {
+            inputDistrito.value = '';           // Apaga o texto
+            this.style.display = 'none';        // Esconde o botão X
+            caixaSugestoes.innerHTML = '';      // Esconde a lista
+            atualizarInterface();               // Reseta o mapa
+            inputDistrito.focus();              // Devolve o cursor piscando na caixa
+        });
+    }
 
     inputDistrito.addEventListener('input', function() {
         const digitado = this.value;
         caixaSugestoes.innerHTML = '';
+        focoAtual = -1; 
         
-        // --- NOVO: Se o campo for apagado, reseta o mapa na hora ---
-        if (!digitado) {
-            atualizarInterface(); 
-            return;
+        // Ação 2: Mostra o X se tiver texto, esconde se estiver vazio
+        if (btnLimparDistrito) {
+            btnLimparDistrito.style.display = digitado.length > 0 ? 'block' : 'none';
         }
-        // -----------------------------------------------------------
+
+        if (!digitado) { atualizarInterface(); return; }
 
         const termoLimpo = removerAcentos(digitado);
         const resultados = listaDistritosOficiais.filter(nome => removerAcentos(nome).includes(termoLimpo));
 
         resultados.forEach(nome => {
             const item = document.createElement('div');
-            item.innerHTML = nome;
+            item.innerHTML = formatarNome(nome);
             item.addEventListener('click', function() {
-                inputDistrito.value = nome; 
+                inputDistrito.value = this.innerText;
                 caixaSugestoes.innerHTML = ''; 
-                // A SOLUÇÃO: Dispara a atualização do mapa na hora que clica na sugestão!
                 atualizarInterface(); 
             });
             caixaSugestoes.appendChild(item);
         });
     });
 
-    document.addEventListener('click', function(e) {
-        if (e.target !== inputDistrito) caixaSugestoes.innerHTML = '';
+    inputDistrito.addEventListener('keydown', function(e) {
+        let itens = caixaSugestoes.getElementsByTagName('div');
+
+        if (e.key === 'ArrowDown') {
+            if (itens.length === 0) return;
+            focoAtual++;
+            adicionarClasseAtiva(itens);
+        } else if (e.key === 'ArrowUp') {
+            if (itens.length === 0) return;
+            focoAtual--;
+            adicionarClasseAtiva(itens);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            
+            if (focoAtual > -1 && itens.length > 0) {
+                itens[focoAtual].click();
+            } else {
+                if (this.value) {
+                    this.value = formatarNome(this.value);
+                }
+                caixaSugestoes.innerHTML = ''; 
+                atualizarInterface(); 
+            }
+        }
+    });
+
+    function adicionarClasseAtiva(itens) {
+        removerClasseAtiva(itens);
+        if (focoAtual >= itens.length) focoAtual = 0;
+        if (focoAtual < 0) focoAtual = itens.length - 1;
+        itens[focoAtual].classList.add('autocomplete-active');
+        itens[focoAtual].scrollIntoView({ block: 'nearest' });
+    }
+
+    function removerClasseAtiva(itens) {
+        for (let i = 0; i < itens.length; i++) itens[i].classList.remove('autocomplete-active');
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== inputDistrito && e.target !== btnLimparDistrito) {
+            caixaSugestoes.innerHTML = '';
+        }
     });
 }
 
-// --- ATUALIZAÇÃO DA INTERFACE, MAPA E ZOOM INTELIGENTE ---
+// --- ATUALIZAÇÃO DA INTERFACE E ZOOM ---
 function atualizarInterface() {
-    const tipoSelecionado = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
-    const zonaSelecionada = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
-    const distritoDigitado = document.getElementById('filtro-distrito') ? document.getElementById('filtro-distrito').value : '';
-
-    const temFiltroAtivo = (zonaSelecionada !== 'Todas' || tipoSelecionado !== 'Todos' || distritoDigitado.trim() !== '');
+    const tipo = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
+    const zona = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
+    const distrito = document.getElementById('filtro-distrito') ? document.getElementById('filtro-distrito').value : '';
+    const temFiltro = (zona !== 'Todas' || tipo !== 'Todos' || distrito.trim() !== '');
 
     const params = new URLSearchParams();
-    if (tipoSelecionado !== 'Todos') params.append('tipo', tipoSelecionado);
-    if (zonaSelecionada !== 'Todas') params.append('zona', zonaSelecionada);
-    if (distritoDigitado.trim() !== '') params.append('distrito', distritoDigitado.trim());
+    if (tipo !== 'Todos') params.append('tipo', tipo);
+    if (zona !== 'Todas') params.append('zona', zona);
+    if (distrito.trim() !== '') params.append('distrito', distrito.trim());
 
     fetch(`/dados?${params.toString()}`).then(res => res.json()).then(pontos => {
         markerGroup.clearLayers();
         pinosSemBolha.clearLayers();
-        if (camadaPoligono) {
-            map.removeLayer(camadaPoligono);
-            camadaPoligono = null;
-        }
-
-        const lista = document.getElementById('feed-lista');
-        if(lista) lista.innerHTML = "";
-        
-        const contagemCrimes = {};
-        let crimeMaisFrequente = "--";
-        let maxOcorrencias = 0;
-
-        pontos.forEach((p, index) => {
-            contagemCrimes[p.tipo] = (contagemCrimes[p.tipo] || 0) + 1;
-            if (contagemCrimes[p.tipo] > maxOcorrencias) {
-                maxOcorrencias = contagemCrimes[p.tipo];
-                crimeMaisFrequente = p.tipo;
-            }
-
-            let marcador = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
-                .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
-
-            if (temFiltroAtivo) {
-                pinosSemBolha.addLayer(marcador);
-            } else {
-                markerGroup.addLayer(marcador);
-            }
-
-            if (index < 10 && lista) {
-                let partes = p.data_hora.split(" ");
-                let dataPartes = partes[0].split("-");
-                let horaPartes = partes[1].split(":");
-                let dataF = `${dataPartes[2]}/${dataPartes[1]}/${dataPartes[0]} às ${horaPartes[0]}:${horaPartes[1]}`;
-                lista.innerHTML += `
-                    <div class="feed-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div class="feed-details"><strong>${p.tipo}</strong><br><small>${dataF}</small></div>
-                    </div>`;
-            }
-        });
+        if (camadaPoligono) { map.removeLayer(camadaPoligono); camadaPoligono = null; }
 
         const metricTotal = document.getElementById('metric-total');
-        const metricFreq = document.getElementById('metric-frequent');
-        if (metricTotal) metricTotal.innerText = pontos.length;
-        if (metricFreq) metricFreq.innerText = crimeMaisFrequente;
+        if(metricTotal) metricTotal.innerText = pontos.length;
 
-        // ZOOM INTELIGENTE (ESTILO GOOGLE MAPS) E FRONTEIRAS VISUAIS
-        if (temFiltroAtivo) {
-            if (pontos.length > 0) {
-                map.flyToBounds(pinosSemBolha.getBounds(), { padding: [50, 50], duration: 1.5 });
-            }
+        pontos.forEach(p => {
+            let m = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
+                     .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
+            temFiltro ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
+        });
 
-            if (distritoDigitado.trim() !== '') {
-                fetch('https://raw.githubusercontent.com/codigourbano/distritos-sp/master/distritos-sp.geojson')
-                    .then(res => res.json())
-                    .then(geoData => {
-                        const zonaGeo = geoData.features.find(f => {
-                            const nomeDistrito = f.properties.ds_nome || f.properties.NOME || f.properties.name || "";
-                            return removerAcentos(nomeDistrito) === removerAcentos(distritoDigitado.trim());
-                        });
-                        
-                        if (zonaGeo) {
-                            camadaPoligono = L.geoJSON(zonaGeo, {
-                                style: { color: 'var(--light-blue)', fillColor: 'var(--light-blue)', fillOpacity: 0.15, weight: 2 }
-                            }).addTo(map);
-                            map.flyToBounds(camadaPoligono.getBounds(), { duration: 1.5 });
-                        }
-                    }).catch(err => console.log("Erro ao buscar a fronteira de distrito.", err));
-            } 
-        } else {
-            map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
+        if (temFiltro && pontos.length > 0) {
+            map.flyToBounds(pinosSemBolha.getBounds(), { padding: [50, 50], duration: 1.5 });
+        } else if (!temFiltro) {
+            map.flyTo([-23.5505, -46.6333], 13, { duration: 1.5 });
         }
 
-    }).catch(error => console.error("Erro ao atualizar interface:", error));
+        if (distrito.trim() !== '') {
+            fetch('https://raw.githubusercontent.com/codigourbano/distritos-sp/master/distritos-sp.geojson')
+                .then(res => res.json()).then(data => {
+                    const zonaGeo = data.features.find(f => removerAcentos(f.properties.ds_nome || "") === removerAcentos(distrito));
+                    if (zonaGeo) {
+                        camadaPoligono = L.geoJSON(zonaGeo, { style: { color: '#3498db', weight: 2, fillOpacity: 0.1 } }).addTo(map);
+                        map.flyToBounds(camadaPoligono.getBounds(), { duration: 1.5 });
+                    }
+                });
+        }
+    });
 }
 
-// Inicializa o painel ao carregar a página
-atualizarInterface();
-
-// --- LÓGICA DO GRÁFICO ---
+// --- GRÁFICO ---
 let graficoInstancia = null;
 function carregarGrafico() {
     fetch('/estatisticas/horarios').then(res => res.json()).then(dados => {
-        let labels = []; let valores = [];
-        for (let i = 0; i < 24; i++) {
-            let h = i.toString().padStart(2, '0');
-            labels.push(h + 'h'); valores.push(dados[h] || 0);
-        }
         const canvas = document.getElementById('graficoHorarios');
-        if (!canvas) return; // Evita erro se o gráfico estiver escondido
-        
+        if(!canvas) return;
         const ctx = canvas.getContext('2d');
         if (graficoInstancia) graficoInstancia.destroy();
         graficoInstancia = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels,
-                datasets: [{ label: 'Ocorrências', data: valores, backgroundColor: '#2980b9' }]
+                labels: Object.keys(dados).map(h => h + 'h'),
+                datasets: [{ label: 'Ocorrências', data: Object.values(dados), backgroundColor: '#2980b9' }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+            options: { responsive: true }
         });
     });
 }
+
+atualizarInterface();
