@@ -30,9 +30,25 @@ function abrirModalRegistro() {
 function fecharModal() {
     const modal = document.getElementById('modal-registro');
     modal.style.display = 'none';
-    if (tempMarker) map.removeLayer(tempMarker);
+    
+    // 1. Remove o pino temporário se ele existir
+    if (tempMarker) {
+        map.removeLayer(tempMarker);
+        tempMarker = null;
+    }
+    
+    // 2. Reseta o seletor de tipo de crime
     const tipo = document.getElementById('tipo-crime');
     if (tipo) tipo.selectedIndex = 0;
+
+    // 3. Limpa o campo de endereço e esconde o botão "X" interno
+    const inputEnd = document.getElementById('endereco-input');
+    const btnLimparEnd = document.getElementById('btn-limpar-endereco');
+    if (inputEnd) inputEnd.value = "";
+    if (btnLimparEnd) btnLimparEnd.style.display = 'none';
+
+    // 4. Voo elegante de volta para a posição inicial do mapa
+    map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
 }
 
 // --- CONFIGURAÇÃO DO MAPA ---
@@ -300,3 +316,208 @@ function carregarGrafico() {
 }
 
 atualizarInterface();
+
+// --- LÓGICA DE BUSCA DE ENDEREÇO POR TEXTO ---
+function buscarEndereco() {
+    const enderecoInput = document.getElementById('endereco-input').value;
+    
+    if (!enderecoInput || enderecoInput.trim() === "") {
+        alert("Por favor, introduza um endereço para pesquisar.");
+        return;
+    }
+
+    // Adicionamos "São Paulo, SP, Brasil" para focar a pesquisa na região correta
+    const busca = enderecoInput + ", São Paulo, SP, Brasil";
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busca)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+
+                // 1. Atualiza os inputs ocultos para o registo na base de dados
+                document.getElementById('lat-input').value = lat;
+                document.getElementById('lng-input').value = lng;
+
+                // 2. Remove o pino anterior, se existir
+                if (tempMarker) map.removeLayer(tempMarker);
+
+                // 3. Adiciona o novo pino no local encontrado
+                tempMarker = L.marker([lat, lng]).addTo(map);
+
+                // 4. Faz o voo (zoom) até ao local
+                map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
+
+                // 5. Descobre o distrito exato desse novo ponto para o formulário
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(res => res.json())
+                    .then(reverseData => {
+                        if (reverseData && reverseData.address) {
+                            const d = reverseData.address;
+                            const distrito = d.suburb || d.city_district || d.neighbourhood || "Desconhecido";
+                            document.getElementById('distrito-input').value = distrito;
+                        }
+                    });
+            } else {
+                alert("Endereço não encontrado. Tente ser mais específico (ex: Rua Direita, 100).");
+            }
+        })
+        .catch(erro => {
+            console.error("Erro na pesquisa de endereço:", erro);
+            alert("Ocorreu um erro ao comunicar com o servidor de mapas.");
+        });
+}
+
+// ====================================================================
+// AUTOCOMPLETE DE ENDEREÇOS E BOTÃO X UNIFICADOS
+// ====================================================================
+const inputEndereco = document.getElementById('endereco-input');
+const btnLimparEndereco = document.getElementById('btn-limpar-endereco'); // Declarado apenas aqui!
+let timeoutBuscaEndereco; 
+
+if (inputEndereco) {
+    const caixaSugestoesEnd = document.createElement('div');
+    caixaSugestoesEnd.setAttribute('class', 'autocomplete-items');
+    inputEndereco.parentNode.style.position = 'relative'; 
+    inputEndereco.parentNode.appendChild(caixaSugestoesEnd);
+
+    let focoAtualEnd = -1;
+
+    // LÓGICA DO BOTÃO "X" (CLIQUE)
+    if (btnLimparEndereco) {
+        btnLimparEndereco.addEventListener('click', function() {
+            inputEndereco.value = '';             
+            this.style.display = 'none';          
+            caixaSugestoesEnd.innerHTML = '';
+            
+            document.getElementById('lat-input').value = '';
+            document.getElementById('lng-input').value = '';
+            document.getElementById('distrito-input').value = '';
+            
+            if (tempMarker) {
+                map.removeLayer(tempMarker);
+                tempMarker = null;
+            }
+            map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
+        });
+    }
+
+    // LÓGICA DE DIGITAÇÃO E AUTOCOMPLETE
+    inputEndereco.addEventListener('input', function() {
+        const digitado = this.value;
+        
+        // Mostra ou esconde o "X" dinamicamente
+        if (btnLimparEndereco) {
+            btnLimparEndereco.style.display = digitado.length > 0 ? 'block' : 'none';
+        }
+
+        // Se o usuário apagar tudo na tecla Backspace, reseta o mapa
+        if (digitado.length === 0) {
+            if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+            map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
+            caixaSugestoesEnd.innerHTML = '';
+            return;
+        }
+
+        caixaSugestoesEnd.innerHTML = '';
+        focoAtualEnd = -1;
+
+        if (digitado.length < 4) return; 
+
+        clearTimeout(timeoutBuscaEndereco);
+        
+        timeoutBuscaEndereco = setTimeout(() => {
+            const busca = digitado + ", São Paulo, SP, Brasil";
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busca)}&limit=5&addressdetails=1`)
+                .then(res => res.json())
+                .then(data => {
+                    caixaSugestoesEnd.innerHTML = ''; 
+                    
+                    data.forEach(local => {
+                        const item = document.createElement('div');
+                        
+                        let end = local.address || {};
+                        let pontoReferencia = end.amenity || end.building || end.shop || end.tourism || end.railway || end.office || "";
+                        let logradouro = end.road || end.pedestrian || end.square || "Endereço não identificado";
+                        let numero = end.house_number ? `, ${end.house_number}` : "";
+                        let bairro = end.suburb || end.city_district || end.neighbourhood || "";
+                        
+                        let baseEndereco = pontoReferencia ? `${pontoReferencia} - ${logradouro}${numero}` : `${logradouro}${numero}`;
+                        let bairroFormatado = bairro ? ` (${bairro})` : "";
+                        let nomeExibicao = `${baseEndereco}${bairroFormatado}`;
+
+                        if (nomeExibicao.trim().length < 5 || nomeExibicao.includes("undefined")) {
+                            nomeExibicao = local.display_name.split(',').slice(0, 3).join(', ');
+                        }
+
+                        item.innerHTML = `<strong><i class="fas fa-map-marker-alt" style="color:#e74c3c; margin-right:8px;"></i>${nomeExibicao}</strong>`;
+                        
+                        item.addEventListener('click', function() {
+                            inputEndereco.value = nomeExibicao;
+                            caixaSugestoesEnd.innerHTML = '';
+                            
+                            const lat = parseFloat(local.lat);
+                            const lng = parseFloat(local.lon);
+                            
+                            document.getElementById('lat-input').value = lat;
+                            document.getElementById('lng-input').value = lng;
+                            
+                            if (tempMarker) map.removeLayer(tempMarker);
+                            tempMarker = L.marker([lat, lng]).addTo(map);
+                            
+                            map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
+                            
+                            if (local.address) {
+                                const distritoDescoberto = end.suburb || end.city_district || end.neighbourhood;
+                                if (distritoDescoberto) {
+                                    document.getElementById('distrito-input').value = distritoDescoberto;
+                                }
+                            }
+                        });
+                        
+                        caixaSugestoesEnd.appendChild(item);
+                    });
+                })
+                .catch(erro => console.error("Erro na busca de endereço.", erro));
+        }, 500); 
+    });
+
+    // NAVEGAÇÃO POR TECLADO
+    inputEndereco.addEventListener('keydown', function(e) {
+        let itens = caixaSugestoesEnd.getElementsByTagName('div');
+
+        if (e.key === 'ArrowDown') {
+            if (itens.length === 0) return;
+            focoAtualEnd++;
+            adicionarClasseAtivaEnd(itens);
+        } else if (e.key === 'ArrowUp') {
+            if (itens.length === 0) return;
+            focoAtualEnd--;
+            adicionarClasseAtivaEnd(itens);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (focoAtualEnd > -1 && itens.length > 0) {
+                itens[focoAtualEnd].click();
+            } else if (this.value) {
+                caixaSugestoesEnd.innerHTML = '';
+                buscarEndereco(); 
+            }
+        }
+    });
+
+    function adicionarClasseAtivaEnd(itens) {
+        for (let i = 0; i < itens.length; i++) itens[i].classList.remove('autocomplete-active');
+        if (focoAtualEnd >= itens.length) focoAtualEnd = 0;
+        if (focoAtualEnd < 0) focoAtualEnd = itens.length - 1;
+        itens[focoAtualEnd].classList.add('autocomplete-active');
+        itens[focoAtualEnd].scrollIntoView({ block: 'nearest' });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== inputEndereco) {
+            caixaSugestoesEnd.innerHTML = '';
+        }
+    });
+}

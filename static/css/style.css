@@ -616,3 +616,6 @@ body.dark-mode .caixa-metrica small {
     color: white;
 }
 
+#btn-limpar-endereco:hover {
+    color: #e74c3c !important; /* Fica vermelho ao passar o mouse */
+}

@@ -15,7 +15,7 @@
 
     <div id="sidebar">
         <h1>🛡️ SIBO SafeView</h1>
-        
+
         <div class="menu-item" onclick="abrirModalRegistro()">
             <i class="fas fa-edit"></i> Registrar Ocorrência
         </div>
@@ -35,7 +35,8 @@
             <i class="fas fa-moon"></i> <span>Modo Escuro</span>
         </div>
 
-        <div style="margin-top: auto; font-size: 11px; color: #bdc3c7; border-top: 1px solid #34495e; padding-top: 15px;">
+        <div
+            style="margin-top: auto; font-size: 11px; color: #bdc3c7; border-top: 1px solid #34495e; padding-top: 15px;">
             Desenvolvido por: The Halls<br>
             Projeto de Extensão TIC | Uninove
         </div>
@@ -43,7 +44,7 @@
 
     <div id="main-content">
         <div id="map"></div>
-        
+
         <button id="btn-reposicionar" class="btn-flutuante" title="Voltar para o centro">
             <i class="fas fa-crosshairs"></i>
         </button>
@@ -56,7 +57,8 @@
             </div>
             <div class="metric-item">
                 <div class="metric-title">Mais Frequente</div>
-                <div class="metric-value" style="font-size: 12px; height: 38px; color: #e74c3c;" id="metric-frequent">--</div>
+                <div class="metric-value" style="font-size: 12px; height: 38px; color: #e74c3c;" id="metric-frequent">--
+                </div>
                 <div class="metric-desc">Tipo de Crime</div>
             </div>
         </div>
@@ -67,11 +69,21 @@
                 <button class="btn-fechar" onclick="fecharPainel('popup-legenda')"><i class="fas fa-times"></i></button>
             </div>
             <div class="conteudo-painel">
-                <div class="legend-item"><div class="legend-icon icon-car"><i class="fas fa-car-side"></i></div> Roubo de Veículo</div>
-                <div class="legend-item"><div class="legend-icon icon-phone"><i class="fas fa-mobile-alt"></i></div> Roubo a Pedestre</div>
-                <div class="legend-item"><div class="legend-icon icon-person"><i class="fas fa-user-shield"></i></div> Agressão Física</div>
-                <div class="legend-item"><div class="legend-icon icon-vandal"><i class="fas fa-spray-can"></i></div> Vandalismo</div>
-                <div class="legend-item"><div class="legend-icon icon-other"><i class="fas fa-question-circle"></i></div> Outros</div>
+                <div class="legend-item">
+                    <div class="legend-icon icon-car"><i class="fas fa-car-side"></i></div> Roubo de Veículo
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon icon-phone"><i class="fas fa-mobile-alt"></i></div> Roubo a Pedestre
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon icon-person"><i class="fas fa-user-shield"></i></div> Agressão Física
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon icon-vandal"><i class="fas fa-spray-can"></i></div> Vandalismo
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon icon-other"><i class="fas fa-question-circle"></i></div> Outros
+                </div>
             </div>
         </div>
 
@@ -84,7 +96,7 @@
                 <div id="feed-lista"></div>
             </div>
         </div>
-        
+
         <div id="popup-grafico" class="painel-flutuante">
             <div class="cabecalho-painel" id="cabecalho-grafico">
                 <h3><i class="fas fa-chart-bar"></i> Ocorrências por Horário</h3>
@@ -95,15 +107,20 @@
             </div>
         </div>
 
-        <div id="painel-filtros" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box; overflow: visible !important;">
-            
-            <div id="cabecalho-filtros" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-filter"></i> Filtrar Ocorrências</h3>
-                <i class="fas fa-times" style="cursor: pointer; color: #e74c3c; font-size: 18px;" onclick="fecharPainel('painel-filtros')"></i>
+        <div id="painel-filtros" class="painel-flutuante"
+            style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box; overflow: visible !important;">
+
+            <div id="cabecalho-filtros"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-filter"></i> Filtrar
+                    Ocorrências</h3>
+                <i class="fas fa-times" style="cursor: pointer; color: #e74c3c; font-size: 18px;"
+                    onclick="fecharPainel('painel-filtros')"></i>
             </div>
 
             <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Macro-Região:</label>
-            <select id="filtro-zona" onchange="atualizarInterface()" style="width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
+            <select id="filtro-zona" onchange="atualizarInterface()"
+                style="width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="Todas">Todas as Zonas</option>
                 <option value="Norte">Zona Norte</option>
                 <option value="Sul">Zona Sul</option>
@@ -111,16 +128,22 @@
                 <option value="Oeste">Zona Oeste</option>
                 <option value="Centro">Centro</option>
             </select>
-            
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito / Bairro:</label>
+
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Distrito /
+                Bairro:</label>
             <div style="position: relative; z-index: 100; display: flex; align-items: center;">
-                <input type="text" id="filtro-distrito" placeholder="Digite o distrito..." style="width: 100%; box-sizing: border-box; padding: 8px; padding-right: 30px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
-                
-                <i class="fas fa-times" id="btn-limpar-distrito" style="position: absolute; right: 10px; z-index: 101; color: #95a5a6; cursor: pointer; display: none;" title="Limpar busca"></i>
+                <input type="text" id="filtro-distrito" placeholder="Digite o distrito..."
+                    style="width: 100%; box-sizing: border-box; padding: 8px; padding-right: 30px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
+
+                <i class="fas fa-times" id="btn-limpar-distrito"
+                    style="position: absolute; right: 10px; z-index: 101; color: #95a5a6; cursor: pointer; display: none;"
+                    title="Limpar busca"></i>
             </div>
 
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-top: 12px; margin-bottom: 3px;">Tipo de Ocorrência:</label>
-            <select id="filtro-tipo" onchange="atualizarInterface()" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-top: 12px; margin-bottom: 3px;">Tipo
+                de Ocorrência:</label>
+            <select id="filtro-tipo" onchange="atualizarInterface()"
+                style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="Todos">Todos os Registros</option>
                 <option value="Roubo a Pedestre (com ameaça)">Roubo a Pedestre (com ameaça)</option>
                 <option value="Furto a Pedestre (sem violência)">Furto a Pedestre (sem violência)</option>
@@ -134,23 +157,40 @@
             </select>
         </div>
 
-        <div id="modal-registro" class="painel-flutuante" style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
-            
-            <div id="cabecalho-registro" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-plus-circle"></i> Registrar Ocorrência</h3>
-                <i class="fas fa-times" style="cursor: pointer; color: #e74c3c; font-size: 18px;" onclick="fecharModal()"></i>
+        <div id="modal-registro" class="painel-flutuante"
+            style="display: none; position: absolute; top: 200px; right: 39px; width: 320px; background-color: #1a252f; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 15px; z-index: 1000; box-sizing: border-box;">
+
+            <div id="cabecalho-registro"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #34495e; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 16px; color: #ecf0f1;"><i class="fas fa-plus-circle"></i> Registrar
+                    Ocorrência</h3>
+                <i class="fas fa-times" style="cursor: pointer; color: #e74c3c; font-size: 18px;"
+                    onclick="fecharModal()"></i>
             </div>
 
-            <p style="font-size: 11px; color: #95a5a6; margin-bottom: 15px; margin-top: 0;">Clique no mapa OU digite o endereço abaixo.</p>
+            <p style="font-size: 11px; color: #95a5a6; margin-bottom: 15px; margin-top: 0;">Clique no mapa OU digite o
+                endereço abaixo.</p>
 
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Endereço do Crime:</label>
-            <div style="display: flex; gap: 5px; margin-bottom: 12px;">
-                <input type="text" id="endereco-input" placeholder="Ex: Avenida Paulista, 1000" style="flex: 1; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d;">
-                <button onclick="buscarEndereco()" style="background-color: #2c3e50; border: 1px solid #7f8c8d; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer;"><i class="fas fa-search"></i></button>
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 5px;">Endereço da
+                Ocorrência:</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="position: relative; flex-grow: 1;">
+                    <input type="text" id="endereco-input" autocomplete="off" placeholder="Digite o endereço..."
+                        style="width: 100%; padding: 8px 30px 8px 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; box-sizing: border-box;">
+
+                    <i id="btn-limpar-endereco" class="fas fa-times"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #95a5a6; display: none;"></i>
+                </div>
+                <button onclick="buscarEndereco()"
+                    style="background: #3498db; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
 
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Tipo de Ocorrência:</label>
-            <select id="tipo-crime" style="width: 100%; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Tipo de
+                Ocorrência:</label>
+            <select id="tipo-crime"
+                style="width: 100%; margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; cursor: pointer;">
                 <option value="" disabled selected>Selecione a ocorrência...</option>
                 <option value="Roubo a Pedestre (com ameaça)">Roubo a Pedestre (com ameaça)</option>
                 <option value="Furto a Pedestre (sem violência)">Furto a Pedestre (sem violência)</option>
@@ -163,10 +203,14 @@
                 <option value="Atividade Suspeita">Atividade Suspeita</option>
             </select>
 
-            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Data e Horário do Crime:</label>
+            <label style="font-size: 11px; color: #95a5a6; display: block; margin-bottom: 3px;">Data e Horário do
+                Crime:</label>
             <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-                <input type="datetime-local" id="data-hora-input" min="2000-01-01T00:00" max="2030-12-31T23:59" style="flex: 1; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; color-scheme: dark; box-sizing: border-box;">
-                <button type="button" onclick="document.getElementById('data-hora-input').value = ''" style="background: #e74c3c; color: white; border: none; padding: 0 12px; border-radius: 4px; cursor: pointer;" title="Limpar tudo">
+                <input type="datetime-local" id="data-hora-input" min="2000-01-01T00:00" max="2030-12-31T23:59"
+                    style="flex: 1; padding: 8px; border-radius: 4px; background: #2c3e50; color: white; border: 1px solid #7f8c8d; color-scheme: dark; box-sizing: border-box;">
+                <button type="button" onclick="document.getElementById('data-hora-input').value = ''"
+                    style="background: #e74c3c; color: white; border: none; padding: 0 12px; border-radius: 4px; cursor: pointer;"
+                    title="Limpar tudo">
                     <i class="fas fa-eraser"></i>
                 </button>
             </div>
@@ -175,8 +219,11 @@
             <input type="hidden" id="lng-input">
             <input type="hidden" id="distrito-input">
 
-            <button class="btn-form btn-confirmar" onclick="enviarRegistro()" style="width: 100%; padding: 10px; background-color: #27ae60; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">Confirmar Registro</button>
-            <button class="btn-form btn-cancelar" onclick="fecharModal()" style="width: 100%; padding: 10px; background-color: #7f8c8d; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Cancelar</button>
+            <button class="btn-form btn-confirmar" onclick="enviarRegistro()"
+                style="width: 100%; padding: 10px; background-color: #27ae60; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">Confirmar
+                Registro</button>
+            <button class="btn-form btn-cancelar" onclick="fecharModal()"
+                style="width: 100%; padding: 10px; background-color: #7f8c8d; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Cancelar</button>
         </div>
     </div>
 
