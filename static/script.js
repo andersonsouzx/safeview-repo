@@ -119,13 +119,32 @@ function obterIconePorCrime(tipo) {
 
 // --- LÓGICA DE CLIQUE E ENDEREÇO ---
 map.on('click', function (e) {
+    // 1. Atualiza o pino no novo local clicado
     if (tempMarker) map.removeLayer(tempMarker);
     tempMarker = L.marker(e.latlng).addTo(map);
+    
+    // --- A MÁGICA DO VOO ENTRA AQUI ---
+    // Centraliza o mapa no ponto clicado com zoom 17 e uma animação de 1.5 segundos
+    map.flyTo(e.latlng, 17, { animate: true, duration: 1.5 });
+    
+    // 2. Atualiza as coordenadas para a base de dados
     document.getElementById('lat-input').value = e.latlng.lat;
     document.getElementById('lng-input').value = e.latlng.lng;
-    abrirModalRegistro();
-    document.getElementById('endereco-input').value = "Buscando endereço...";
+    
+    // --- A GRANDE CORREÇÃO ESTÁ AQUI ---
+    // Em vez de usar o abrirModalRegistro() que liga/desliga, forçamos a janela a ficar aberta
+    const modal = document.getElementById('modal-registro');
+    document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
+    modal.style.display = 'block';
+    
+    // 3. Atualiza os campos visuais
+    const inputEnd = document.getElementById('endereco-input');
+    const btnLimpar = document.getElementById('btn-limpar-endereco');
+    
+    if (inputEnd) inputEnd.value = "A procurar endereço...";
+    if (btnLimpar) btnLimpar.style.display = 'block'; // Mantém o 'X' visível
 
+    // 4. Vai buscar o nome da rua ao servidor (Reverse Geocoding)
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&zoom=18&addressdetails=1`)
         .then(res => res.json())
         .then(data => {
@@ -133,8 +152,13 @@ map.on('click', function (e) {
                 const d = data.address;
                 const distrito = d.suburb || d.city_district || d.neighbourhood || "Desconhecido";
                 document.getElementById('distrito-input').value = distrito;
-                document.getElementById('endereco-input').value = (d.road || "Rua não identificada") + (d.house_number ? `, ${d.house_number}` : "");
+                if (inputEnd) inputEnd.value = (d.road || "Rua não identificada") + (d.house_number ? `, ${d.house_number}` : "");
+            } else {
+                if (inputEnd) inputEnd.value = "Localização sem endereço definido";
             }
+        })
+        .catch(() => {
+            if (inputEnd) inputEnd.value = "Erro ao procurar endereço";
         });
 });
 
