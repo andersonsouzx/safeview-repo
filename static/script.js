@@ -102,6 +102,7 @@ map.addLayer(markerGroup);
 var pinosSemBolha = L.featureGroup().addTo(map);
 var camadaPoligono = null;
 var tempMarker;
+let pinoDestaque = null;
 
 function obterIconePorCrime(tipo) {
     let iconClass = 'fa-question-circle'; let colorClass = 'marker-other';
@@ -300,6 +301,8 @@ function atualizarInterface() {
                      .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
             temFiltro ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
         });
+
+        atualizarFeedList(pontos);
 
         if (temFiltro && pontos.length > 0) {
             map.flyToBounds(pinosSemBolha.getBounds(), { padding: [50, 50], duration: 1.5 });
@@ -544,4 +547,115 @@ if (inputEndereco) {
             caixaSugestoesEnd.innerHTML = '';
         }
     });
+}
+
+// ====================================================================
+// FEED DE OCORRÊNCIAS E ISOLAMENTO DE MAPA (COM MOSTRAR MAIS)
+// ====================================================================
+function atualizarFeedList(pontos, limite = 10) {
+    const feedLista = document.getElementById('feed-lista');
+    if (!feedLista) return;
+
+    // Limpa a lista antes de desenhar (necessário para quando o limite aumenta)
+    feedLista.innerHTML = '';
+    
+    // Inverte a lista para ter as mais recentes no topo
+    const todasOcorrencias = pontos.slice().reverse(); 
+    
+    // Corta a lista baseada no limite atual (10, 20, 30...)
+    const itensMostrar = todasOcorrencias.slice(0, limite);
+
+    if (itensMostrar.length === 0) {
+        feedLista.innerHTML = '<div style="padding: 15px; text-align: center; color: #95a5a6; font-size: 12px;">Nenhuma ocorrência encontrada.</div>';
+        return;
+    }
+
+    // Desenha os cartões
+    itensMostrar.forEach(p => {
+        let iconClass = 'fa-question-circle'; let colorHex = '#27ae60';
+        if (p.tipo.includes("Veículo")) { iconClass = 'fa-car-side'; colorHex = '#3498db'; }
+        else if (p.tipo.includes("Pedestre") || p.tipo.includes("Celular")) { iconClass = 'fa-mobile-alt'; colorHex = '#8e44ad'; }
+        else if (p.tipo.includes("Agressão")) { iconClass = 'fa-user-shield'; colorHex = '#e74c3c'; }
+        else if (p.tipo.includes("Vandalismo")) { iconClass = 'fa-spray-can'; colorHex = '#f39c12'; }
+
+        const item = document.createElement('div');
+        item.className = 'feed-item';
+        const localExibicao = p.distrito ? p.distrito : "Localização Registrada";
+
+        item.innerHTML = `
+            <div class="feed-icon" style="color: ${colorHex};"><i class="fas ${iconClass}"></i></div>
+            <div class="feed-content">
+                <div class="feed-title">${p.tipo}</div>
+                <div class="feed-address"><i class="fas fa-map-marker-alt" style="color:#7f8c8d; font-size:10px;"></i> ${localExibicao}</div>
+                <div class="feed-time"><i class="far fa-clock" style="color:#7f8c8d; font-size:10px;"></i> ${p.data_hora}</div>
+            </div>
+        `;
+
+        item.addEventListener('click', () => {
+            fecharPainel('popup-feed');
+            
+            if (map.hasLayer(markerGroup)) map.removeLayer(markerGroup);
+            if (typeof pinosSemBolha !== 'undefined' && map.hasLayer(pinosSemBolha)) map.removeLayer(pinosSemBolha);
+            if (pinoDestaque) map.removeLayer(pinoDestaque);
+
+            const conteudoBolha = `
+                <div style="text-align: center; min-width: 160px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    <div style="font-size: 28px; color: ${colorHex}; margin-bottom: 8px;">
+                        <i class="fas ${iconClass}"></i>
+                    </div>
+                    <strong style="display: block; font-size: 15px; color: #2c3e50; margin-bottom: 8px; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px;">
+                        ${p.tipo}
+                    </strong>
+                    <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; gap: 5px;">
+                        <i class="far fa-clock"></i> ${p.data_hora}
+                    </div>
+                    <div style="font-size: 12px; color: #7f8c8d; display: flex; justify-content: center; align-items: center; gap: 5px;">
+                        <i class="fas fa-map-marker-alt"></i> ${localExibicao}
+                    </div>
+                </div>
+            `;
+
+            pinoDestaque = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) }).addTo(map);
+            pinoDestaque.bindPopup(conteudoBolha).openPopup();
+
+            map.flyTo([p.lat, p.lng], 18, { animate: true, duration: 1.5 });
+            document.getElementById('btn-reset-mapa').style.display = 'block';
+        });
+
+        feedLista.appendChild(item);
+    });
+
+    // --- A MÁGICA DO BOTÃO MOSTRAR MAIS ---
+    // Verifica se ainda existem itens no banco que não foram mostrados na tela
+    if (limite < todasOcorrencias.length) {
+        const btnMostrarMais = document.createElement('div');
+        
+        // Calcula exatamente quantas ocorrências faltam
+        const restantes = todasOcorrencias.length - limite;
+        
+        // Adicionamos o contador com uma cor mais suave para não roubar o foco do "Mostrar Mais"
+        btnMostrarMais.innerHTML = `Mostrar Mais <span style="color: #95a5a6; font-size: 11px; font-weight: normal; margin: 0 5px;">(${restantes} restantes)</span> <i class="fas fa-chevron-down"></i>`;
+        
+        // Estilo CSS (adicionei display: flex para alinhar o texto e o contador perfeitamente)
+        btnMostrarMais.style.cssText = 'display: flex; justify-content: center; align-items: center; padding: 12px; color: #3498db; cursor: pointer; font-size: 12px; font-weight: bold; transition: background 0.2s; border-radius: 4px; margin-top: 5px;';
+        
+        // Efeito Hover
+        btnMostrarMais.onmouseover = () => btnMostrarMais.style.backgroundColor = '#2c3e50';
+        btnMostrarMais.onmouseout = () => btnMostrarMais.style.backgroundColor = 'transparent';
+
+        // Ao clicar, recarrega a lista somando +10 ao limite
+        btnMostrarMais.addEventListener('click', () => {
+            atualizarFeedList(pontos, limite + 10);
+        });
+        
+        feedLista.appendChild(btnMostrarMais);
+    }
+}
+
+function restaurarMapa() {
+    if (pinoDestaque) { map.removeLayer(pinoDestaque); pinoDestaque = null; }
+    if (typeof markerGroup !== 'undefined') map.addLayer(markerGroup);
+    if (typeof pinosSemBolha !== 'undefined') map.addLayer(pinosSemBolha);
+    document.getElementById('btn-reset-mapa').style.display = 'none';
+    map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
 }
