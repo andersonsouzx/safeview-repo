@@ -331,13 +331,49 @@ function carregarGrafico() {
         if(!canvas) return;
         const ctx = canvas.getContext('2d');
         if (graficoInstancia) graficoInstancia.destroy();
+        
         graficoInstancia = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: Object.keys(dados).map(h => h + 'h'),
-                datasets: [{ label: 'Ocorrências', data: Object.values(dados), backgroundColor: '#2980b9' }]
+                datasets: [{ 
+                    label: 'Ocorrências', 
+                    data: Object.values(dados), 
+                    backgroundColor: '#3498db', // Azul padrão do SafeView
+                    borderRadius: 6,            // O SEGREDO: Arredonda o topo das barras
+                    borderSkipped: false,
+                    barPercentage: 0.85,        // Deixa a barra mais "gordinha"
+                    categoryPercentage: 1.0     // Aproxima uma barra da outra
+                }]
             },
-            options: { responsive: true }
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { display: false }, // Remove as linhas verticais
+                        ticks: { color: '#95a5a6', maxTicksLimit: 8 }, // Limita a quantidade de horas mostradas para não embolar
+                        border: { display: false }
+                    },
+                    y: {
+                        display: false, // ESCONDE O EIXO Y (Estilo Google)
+                        grid: { display: false } // Remove as linhas horizontais
+                    }
+                },
+                plugins: {
+                    legend: { display: false }, // Esconde a legenda
+                    tooltip: {
+                        backgroundColor: '#1a252f', // Tooltip escuro e elegante
+                        titleFont: { size: 13, family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
+                        bodyFont: { size: 14, weight: 'bold', family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
+                        displayColors: false, // Remove o quadradinho de cor
+                        callbacks: {
+                            title: (items) => `Horário: ${items[0].label}`,
+                            label: (item) => `${item.raw} registros`
+                        }
+                    }
+                }
+            }
         });
     });
 }

@@ -679,3 +679,18 @@ body.dark-mode .caixa-metrica small {
 #feed-lista::-webkit-scrollbar-thumb:hover {
     background: #bdc3c7; /* Fica um pouco mais clara */
 }
+
+/* ==========================================================================
+   AJUSTE DE LARGURA PARA O PAINEL DE ESTATÍSTICAS (GRÁFICO)
+   ========================================================================== */
+#popup-grafico {
+    width: 426px !important; /* Diminuímos de 650px para 450px (o meio-termo ideal) */
+    max-width: 90vw;         
+}
+
+/* Garante que a área de desenho do gráfico tenha altura suficiente */
+#popup-grafico .painel-conteudo,
+#chart-container {
+    height: 300px; 
+    padding: 10px;
+}
