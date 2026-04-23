@@ -281,7 +281,20 @@ function atualizarInterface() {
     const tipo = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
     const zona = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
     const distrito = document.getElementById('filtro-distrito') ? document.getElementById('filtro-distrito').value : '';
-    const temFiltro = (zona !== 'Todas' || tipo !== 'Todos' || distrito.trim() !== '' || horarioSelecionado !== null);
+    const temFiltroAtivo = (horarioSelecionado !== null || zona !== 'Todas' || tipo !== 'Todos');
+
+    const btnReset = document.getElementById('btn-reset-mapa');
+    if (btnReset) {
+        const filtroTipo = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
+        const filtroZona = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
+
+        // O botão aparece se tiver filtro de hora OU se os selects não estiverem no padrão
+        if (horarioSelecionado !== null || filtroTipo !== 'Todos' || filtroZona !== 'Todas') {
+            btnReset.style.display = 'flex'; // Usamos flex para manter o ícone alinhado
+        } else {
+            btnReset.style.display = 'none';
+        }
+    }
 
     const params = new URLSearchParams();
     if (tipo !== 'Todos') params.append('tipo', tipo);
@@ -308,14 +321,14 @@ function atualizarInterface() {
             let m = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
                 .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
 
-            temFiltro ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
+            temFiltroAtivo ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
         });
 
         atualizarFeedList(pontos);
 
-        if (temFiltro && pontos.length > 0) {
+        if (temFiltroAtivo && pontos.length > 0) {
             map.flyToBounds(pinosSemBolha.getBounds(), { padding: [50, 50], duration: 1.5 });
-        } else if (!temFiltro) {
+        } else if (!temFiltroAtivo) {
             map.flyTo([-23.5505, -46.6333], 13, { duration: 1.5 });
         }
 
@@ -724,9 +737,36 @@ function atualizarFeedList(pontos, limite = 10) {
 }
 
 function restaurarMapa() {
-    if (pinoDestaque) { map.removeLayer(pinoDestaque); pinoDestaque = null; }
-    if (typeof markerGroup !== 'undefined') map.addLayer(markerGroup);
-    if (typeof pinosSemBolha !== 'undefined') map.addLayer(pinosSemBolha);
-    document.getElementById('btn-reset-mapa').style.display = 'none';
+    // 1. Limpa o filtro do gráfico
+    horarioSelecionado = null;
+
+    // 2. Limpa os filtros do painel lateral
+    if (document.getElementById('filtro-tipo')) document.getElementById('filtro-tipo').value = 'Todos';
+    if (document.getElementById('filtro-zona')) document.getElementById('filtro-zona').value = 'Todas';
+    if (document.getElementById('filtro-distrito')) document.getElementById('filtro-distrito').value = '';
+
+    if (document.getElementById('btn-limpar-distrito')) {
+        document.getElementById('btn-limpar-distrito').style.display = 'none';
+    }
+
+    // 3. Remove o pino de destaque
+    if (pinoDestaque) {
+        map.removeLayer(pinoDestaque);
+        pinoDestaque = null;
+    }
+
+    // --- A CORREÇÃO MÁGICA ESTÁ AQUI ---
+    // Devolve as camadas de pinos para o mapa caso elas tenham sido ocultadas
+    if (!map.hasLayer(markerGroup)) map.addLayer(markerGroup);
+    if (typeof pinosSemBolha !== 'undefined' && !map.hasLayer(pinosSemBolha)) map.addLayer(pinosSemBolha);
+    // -----------------------------------
+
+    // 4. Voo de regresso
     map.flyTo([-23.5505, -46.6333], 13, { animate: true, duration: 1.5 });
+
+    // 5. Atualiza tudo
+    atualizarInterface();
+    if (graficoInstancia) {
+        graficoInstancia.update();
+    }
 }

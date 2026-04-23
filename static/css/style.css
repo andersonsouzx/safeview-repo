@@ -694,3 +694,28 @@ body.dark-mode .caixa-metrica small {
     height: 300px; 
     padding: 10px;
 }
+
+.botao-flutuante-azul {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background-color: #3498db; /* Azul original do seu sistema */
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    border: none;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.botao-flutuante-azul:hover {
+    background-color: #2980b9;
+    transform: translateX(-50%) scale(1.05);
+}

@@ -43,11 +43,16 @@
     </div>
 
     <div id="main-content">
-        <button id="btn-reset-mapa" class="btn-reset-mapa" style="display: none;" onclick="restaurarMapa()">
-            <i class="fas fa-arrow-left"></i> Voltar ao Mapa Geral
-        </button>
 
         <div id="map"></div>
+
+        <button id="btn-reset-mapa" class="botao-flutuante-azul" onclick="restaurarMapa()" style="display: none;">
+            <i class="fas fa-expand-arrows-alt"></i> Voltar ao Mapa Geral
+        </button>
+
+        <button id="btn-reset-mapa" onclick="restaurarMapa()" style="display: none;">
+            <i class="fas fa-expand-arrows-alt"></i> Voltar ao Mapa Geral
+        </button>
 
         <button id="btn-reposicionar" class="btn-flutuante" title="Voltar para o centro">
             <i class="fas fa-crosshairs"></i>
