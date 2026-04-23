@@ -22,21 +22,21 @@ function abrirModalRegistro() {
     }
     document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
     modal.style.display = 'block';
-    
+
     const inputEndereco = document.getElementById('endereco-input');
-    if(inputEndereco) inputEndereco.value = "";
+    if (inputEndereco) inputEndereco.value = "";
 }
 
 function fecharModal() {
     const modal = document.getElementById('modal-registro');
     modal.style.display = 'none';
-    
+
     // 1. Remove o pino temporário se ele existir
     if (tempMarker) {
         map.removeLayer(tempMarker);
         tempMarker = null;
     }
-    
+
     // 2. Reseta o seletor de tipo de crime
     const tipo = document.getElementById('tipo-crime');
     if (tipo) tipo.selectedIndex = 0;
@@ -123,25 +123,25 @@ map.on('click', function (e) {
     // 1. Atualiza o pino no novo local clicado
     if (tempMarker) map.removeLayer(tempMarker);
     tempMarker = L.marker(e.latlng).addTo(map);
-    
+
     // --- A MÁGICA DO VOO ENTRA AQUI ---
     // Centraliza o mapa no ponto clicado com zoom 17 e uma animação de 1.5 segundos
     map.flyTo(e.latlng, 17, { animate: true, duration: 1.5 });
-    
+
     // 2. Atualiza as coordenadas para a base de dados
     document.getElementById('lat-input').value = e.latlng.lat;
     document.getElementById('lng-input').value = e.latlng.lng;
-    
+
     // --- A GRANDE CORREÇÃO ESTÁ AQUI ---
     // Em vez de usar o abrirModalRegistro() que liga/desliga, forçamos a janela a ficar aberta
     const modal = document.getElementById('modal-registro');
     document.querySelectorAll('.painel-flutuante').forEach(p => p.style.display = 'none');
     modal.style.display = 'block';
-    
+
     // 3. Atualiza os campos visuais
     const inputEnd = document.getElementById('endereco-input');
     const btnLimpar = document.getElementById('btn-limpar-endereco');
-    
+
     if (inputEnd) inputEnd.value = "A procurar endereço...";
     if (btnLimpar) btnLimpar.style.display = 'block'; // Mantém o 'X' visível
 
@@ -186,7 +186,7 @@ const inputDistrito = document.getElementById('filtro-distrito');
 const btnLimparDistrito = document.getElementById('btn-limpar-distrito'); // Puxa o botão X do HTML
 
 if (inputDistrito) {
-    inputDistrito.removeAttribute('list'); 
+    inputDistrito.removeAttribute('list');
     const caixaSugestoes = document.createElement('div');
     caixaSugestoes.setAttribute('class', 'autocomplete-items');
     inputDistrito.parentNode.appendChild(caixaSugestoes);
@@ -195,7 +195,7 @@ if (inputDistrito) {
 
     // Ação 1: Clicar no botão X
     if (btnLimparDistrito) {
-        btnLimparDistrito.addEventListener('click', function() {
+        btnLimparDistrito.addEventListener('click', function () {
             inputDistrito.value = '';           // Apaga o texto
             this.style.display = 'none';        // Esconde o botão X
             caixaSugestoes.innerHTML = '';      // Esconde a lista
@@ -204,11 +204,11 @@ if (inputDistrito) {
         });
     }
 
-    inputDistrito.addEventListener('input', function() {
+    inputDistrito.addEventListener('input', function () {
         const digitado = this.value;
         caixaSugestoes.innerHTML = '';
-        focoAtual = -1; 
-        
+        focoAtual = -1;
+
         // Ação 2: Mostra o X se tiver texto, esconde se estiver vazio
         if (btnLimparDistrito) {
             btnLimparDistrito.style.display = digitado.length > 0 ? 'block' : 'none';
@@ -222,16 +222,16 @@ if (inputDistrito) {
         resultados.forEach(nome => {
             const item = document.createElement('div');
             item.innerHTML = formatarNome(nome);
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function () {
                 inputDistrito.value = this.innerText;
-                caixaSugestoes.innerHTML = ''; 
-                atualizarInterface(); 
+                caixaSugestoes.innerHTML = '';
+                atualizarInterface();
             });
             caixaSugestoes.appendChild(item);
         });
     });
 
-    inputDistrito.addEventListener('keydown', function(e) {
+    inputDistrito.addEventListener('keydown', function (e) {
         let itens = caixaSugestoes.getElementsByTagName('div');
 
         if (e.key === 'ArrowDown') {
@@ -244,15 +244,15 @@ if (inputDistrito) {
             adicionarClasseAtiva(itens);
         } else if (e.key === 'Enter') {
             e.preventDefault();
-            
+
             if (focoAtual > -1 && itens.length > 0) {
                 itens[focoAtual].click();
             } else {
                 if (this.value) {
                     this.value = formatarNome(this.value);
                 }
-                caixaSugestoes.innerHTML = ''; 
-                atualizarInterface(); 
+                caixaSugestoes.innerHTML = '';
+                atualizarInterface();
             }
         }
     });
@@ -281,7 +281,7 @@ function atualizarInterface() {
     const tipo = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'Todos';
     const zona = document.getElementById('filtro-zona') ? document.getElementById('filtro-zona').value : 'Todas';
     const distrito = document.getElementById('filtro-distrito') ? document.getElementById('filtro-distrito').value : '';
-    const temFiltro = (zona !== 'Todas' || tipo !== 'Todos' || distrito.trim() !== '');
+    const temFiltro = (zona !== 'Todas' || tipo !== 'Todos' || distrito.trim() !== '' || horarioSelecionado !== null);
 
     const params = new URLSearchParams();
     if (tipo !== 'Todos') params.append('tipo', tipo);
@@ -294,11 +294,20 @@ function atualizarInterface() {
         if (camadaPoligono) { map.removeLayer(camadaPoligono); camadaPoligono = null; }
 
         const metricTotal = document.getElementById('metric-total');
-        if(metricTotal) metricTotal.innerText = pontos.length;
+        if (metricTotal) metricTotal.innerText = pontos.length;
 
         pontos.forEach(p => {
+            // Extrai a hora (ex: "2024-04-23 10:30" vira 10)
+            const horaPonto = parseInt(p.data_hora.split(' ')[1].split(':')[0]);
+
+            // Se clicou no gráfico, filtra aqui
+            if (horarioSelecionado !== null && horaPonto !== parseInt(horarioSelecionado)) {
+                return;
+            }
+
             let m = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
-                     .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
+                .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
+
             temFiltro ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
         });
 
@@ -324,52 +333,78 @@ function atualizarInterface() {
 }
 
 // --- GRÁFICO ---
+let horarioSelecionado = null;
 let graficoInstancia = null;
+
 function carregarGrafico() {
     fetch('/estatisticas/horarios').then(res => res.json()).then(dados => {
         const canvas = document.getElementById('graficoHorarios');
-        if(!canvas) return;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
+
         if (graficoInstancia) graficoInstancia.destroy();
-        
+
+        // 1. A MÁGICA DA ORDENAÇÃO: Força as chaves a ficarem em ordem numérica (00 até 23)
+        const horasOrdenadas = Object.keys(dados).sort((a, b) => parseInt(a) - parseInt(b));
+        const valoresOrdenados = horasOrdenadas.map(h => dados[h]);
+
         graficoInstancia = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Object.keys(dados).map(h => h + 'h'),
-                datasets: [{ 
-                    label: 'Ocorrências', 
-                    data: Object.values(dados), 
-                    backgroundColor: '#3498db', // Azul padrão do SafeView
-                    borderRadius: 6,            // O SEGREDO: Arredonda o topo das barras
-                    borderSkipped: false,
-                    barPercentage: 0.85,        // Deixa a barra mais "gordinha"
-                    categoryPercentage: 1.0     // Aproxima uma barra da outra
+                // 2. O INTERVALO DE 3 EM 3: Usa a regra do % 3 nas horas já ordenadas
+                labels: horasOrdenadas.map((h, index) => index % 3 === 0 ? h + 'h' : ''),
+                datasets: [{
+                    label: 'Ocorrências',
+                    data: valoresOrdenados, // Usa os dados na ordem correta
+
+                    backgroundColor: (context) => {
+                        const horaAtual = horasOrdenadas[context.dataIndex];
+                        return horarioSelecionado === horaAtual ? '#e74c3c' : '#3498db';
+                    },
+
+                    hoverBackgroundColor: '#e74c3c',
+                    borderRadius: 6,
+                    barPercentage: 0.85
                 }]
             },
-            options: { 
+            options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: { display: false }, // Remove as linhas verticais
-                        ticks: { color: '#95a5a6', maxTicksLimit: 8 }, // Limita a quantidade de horas mostradas para não embolar
-                        border: { display: false }
-                    },
-                    y: {
-                        display: false, // ESCONDE O EIXO Y (Estilo Google)
-                        grid: { display: false } // Remove as linhas horizontais
+
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        // Pega a hora baseada na nossa nova lista ordenada
+                        const horaClicada = horasOrdenadas[index];
+
+                        if (horarioSelecionado === horaClicada) {
+                            horarioSelecionado = null;
+                        } else {
+                            horarioSelecionado = horaClicada;
+                        }
+
+                        atualizarInterface();
+                        graficoInstancia.update();
                     }
                 },
+
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#95a5a6',
+                            autoSkip: false,  // O SEGREDO: Proíbe o Chart.js de esconder horários
+                            maxRotation: 0    // Mantém o texto sempre reto na horizontal
+                        }
+                    },
+                    y: { display: false }
+                },
                 plugins: {
-                    legend: { display: false }, // Esconde a legenda
+                    legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1a252f', // Tooltip escuro e elegante
-                        titleFont: { size: 13, family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
-                        bodyFont: { size: 14, weight: 'bold', family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
-                        displayColors: false, // Remove o quadradinho de cor
                         callbacks: {
-                            title: (items) => `Horário: ${items[0].label}`,
-                            label: (item) => `${item.raw} registros`
+                            // Mostra a hora certa no balãozinho
+                            title: (items) => `Horário: ${horasOrdenadas[items[0].dataIndex]}h`
                         }
                     }
                 }
@@ -383,7 +418,7 @@ atualizarInterface();
 // --- LÓGICA DE BUSCA DE ENDEREÇO POR TEXTO ---
 function buscarEndereco() {
     const enderecoInput = document.getElementById('endereco-input').value;
-    
+
     if (!enderecoInput || enderecoInput.trim() === "") {
         alert("Por favor, introduza um endereço para pesquisar.");
         return;
@@ -437,27 +472,27 @@ function buscarEndereco() {
 // ====================================================================
 const inputEndereco = document.getElementById('endereco-input');
 const btnLimparEndereco = document.getElementById('btn-limpar-endereco'); // Declarado apenas aqui!
-let timeoutBuscaEndereco; 
+let timeoutBuscaEndereco;
 
 if (inputEndereco) {
     const caixaSugestoesEnd = document.createElement('div');
     caixaSugestoesEnd.setAttribute('class', 'autocomplete-items');
-    inputEndereco.parentNode.style.position = 'relative'; 
+    inputEndereco.parentNode.style.position = 'relative';
     inputEndereco.parentNode.appendChild(caixaSugestoesEnd);
 
     let focoAtualEnd = -1;
 
     // LÓGICA DO BOTÃO "X" (CLIQUE)
     if (btnLimparEndereco) {
-        btnLimparEndereco.addEventListener('click', function() {
-            inputEndereco.value = '';             
-            this.style.display = 'none';          
+        btnLimparEndereco.addEventListener('click', function () {
+            inputEndereco.value = '';
+            this.style.display = 'none';
             caixaSugestoesEnd.innerHTML = '';
-            
+
             document.getElementById('lat-input').value = '';
             document.getElementById('lng-input').value = '';
             document.getElementById('distrito-input').value = '';
-            
+
             if (tempMarker) {
                 map.removeLayer(tempMarker);
                 tempMarker = null;
@@ -467,9 +502,9 @@ if (inputEndereco) {
     }
 
     // LÓGICA DE DIGITAÇÃO E AUTOCOMPLETE
-    inputEndereco.addEventListener('input', function() {
+    inputEndereco.addEventListener('input', function () {
         const digitado = this.value;
-        
+
         // Mostra ou esconde o "X" dinamicamente
         if (btnLimparEndereco) {
             btnLimparEndereco.style.display = digitado.length > 0 ? 'block' : 'none';
@@ -486,27 +521,27 @@ if (inputEndereco) {
         caixaSugestoesEnd.innerHTML = '';
         focoAtualEnd = -1;
 
-        if (digitado.length < 4) return; 
+        if (digitado.length < 4) return;
 
         clearTimeout(timeoutBuscaEndereco);
-        
+
         timeoutBuscaEndereco = setTimeout(() => {
             const busca = digitado + ", São Paulo, SP, Brasil";
-            
+
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busca)}&limit=5&addressdetails=1`)
                 .then(res => res.json())
                 .then(data => {
-                    caixaSugestoesEnd.innerHTML = ''; 
-                    
+                    caixaSugestoesEnd.innerHTML = '';
+
                     data.forEach(local => {
                         const item = document.createElement('div');
-                        
+
                         let end = local.address || {};
                         let pontoReferencia = end.amenity || end.building || end.shop || end.tourism || end.railway || end.office || "";
                         let logradouro = end.road || end.pedestrian || end.square || "Endereço não identificado";
                         let numero = end.house_number ? `, ${end.house_number}` : "";
                         let bairro = end.suburb || end.city_district || end.neighbourhood || "";
-                        
+
                         let baseEndereco = pontoReferencia ? `${pontoReferencia} - ${logradouro}${numero}` : `${logradouro}${numero}`;
                         let bairroFormatado = bairro ? ` (${bairro})` : "";
                         let nomeExibicao = `${baseEndereco}${bairroFormatado}`;
@@ -516,22 +551,22 @@ if (inputEndereco) {
                         }
 
                         item.innerHTML = `<strong><i class="fas fa-map-marker-alt" style="color:#e74c3c; margin-right:8px;"></i>${nomeExibicao}</strong>`;
-                        
-                        item.addEventListener('click', function() {
+
+                        item.addEventListener('click', function () {
                             inputEndereco.value = nomeExibicao;
                             caixaSugestoesEnd.innerHTML = '';
-                            
+
                             const lat = parseFloat(local.lat);
                             const lng = parseFloat(local.lon);
-                            
+
                             document.getElementById('lat-input').value = lat;
                             document.getElementById('lng-input').value = lng;
-                            
+
                             if (tempMarker) map.removeLayer(tempMarker);
                             tempMarker = L.marker([lat, lng]).addTo(map);
-                            
+
                             map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
-                            
+
                             if (local.address) {
                                 const distritoDescoberto = end.suburb || end.city_district || end.neighbourhood;
                                 if (distritoDescoberto) {
@@ -539,16 +574,16 @@ if (inputEndereco) {
                                 }
                             }
                         });
-                        
+
                         caixaSugestoesEnd.appendChild(item);
                     });
                 })
                 .catch(erro => console.error("Erro na busca de endereço.", erro));
-        }, 500); 
+        }, 500);
     });
 
     // NAVEGAÇÃO POR TECLADO
-    inputEndereco.addEventListener('keydown', function(e) {
+    inputEndereco.addEventListener('keydown', function (e) {
         let itens = caixaSugestoesEnd.getElementsByTagName('div');
 
         if (e.key === 'ArrowDown') {
@@ -565,7 +600,7 @@ if (inputEndereco) {
                 itens[focoAtualEnd].click();
             } else if (this.value) {
                 caixaSugestoesEnd.innerHTML = '';
-                buscarEndereco(); 
+                buscarEndereco();
             }
         }
     });
@@ -594,10 +629,10 @@ function atualizarFeedList(pontos, limite = 10) {
 
     // Limpa a lista antes de desenhar (necessário para quando o limite aumenta)
     feedLista.innerHTML = '';
-    
+
     // Inverte a lista para ter as mais recentes no topo
-    const todasOcorrencias = pontos.slice().reverse(); 
-    
+    const todasOcorrencias = pontos.slice().reverse();
+
     // Corta a lista baseada no limite atual (10, 20, 30...)
     const itensMostrar = todasOcorrencias.slice(0, limite);
 
@@ -629,7 +664,7 @@ function atualizarFeedList(pontos, limite = 10) {
 
         item.addEventListener('click', () => {
             fecharPainel('popup-feed');
-            
+
             if (map.hasLayer(markerGroup)) map.removeLayer(markerGroup);
             if (typeof pinosSemBolha !== 'undefined' && map.hasLayer(pinosSemBolha)) map.removeLayer(pinosSemBolha);
             if (pinoDestaque) map.removeLayer(pinoDestaque);
@@ -665,16 +700,16 @@ function atualizarFeedList(pontos, limite = 10) {
     // Verifica se ainda existem itens no banco que não foram mostrados na tela
     if (limite < todasOcorrencias.length) {
         const btnMostrarMais = document.createElement('div');
-        
+
         // Calcula exatamente quantas ocorrências faltam
         const restantes = todasOcorrencias.length - limite;
-        
+
         // Adicionamos o contador com uma cor mais suave para não roubar o foco do "Mostrar Mais"
         btnMostrarMais.innerHTML = `Mostrar Mais <span style="color: #95a5a6; font-size: 11px; font-weight: normal; margin: 0 5px;">(${restantes} restantes)</span> <i class="fas fa-chevron-down"></i>`;
-        
+
         // Estilo CSS (adicionei display: flex para alinhar o texto e o contador perfeitamente)
         btnMostrarMais.style.cssText = 'display: flex; justify-content: center; align-items: center; padding: 12px; color: #3498db; cursor: pointer; font-size: 12px; font-weight: bold; transition: background 0.2s; border-radius: 4px; margin-top: 5px;';
-        
+
         // Efeito Hover
         btnMostrarMais.onmouseover = () => btnMostrarMais.style.backgroundColor = '#2c3e50';
         btnMostrarMais.onmouseout = () => btnMostrarMais.style.backgroundColor = 'transparent';
@@ -683,7 +718,7 @@ function atualizarFeedList(pontos, limite = 10) {
         btnMostrarMais.addEventListener('click', () => {
             atualizarFeedList(pontos, limite + 10);
         });
-        
+
         feedLista.appendChild(btnMostrarMais);
     }
 }
