@@ -775,3 +775,79 @@ function restaurarMapa() {
         graficoInstancia.update();
     }
 }
+
+// Função para mostrar a notificação elegante
+function mostrarToast() {
+    const toast = document.getElementById('toast-notificacao');
+    if (toast) {
+        toast.classList.add('mostrar');
+        // Esconde a notificação automaticamente após 3 segundos
+        setTimeout(() => {
+            toast.classList.remove('mostrar');
+        }, 3000);
+    }
+}
+
+function enviarRegistro() {
+    const tipo = document.getElementById('tipo-crime').value;
+    const lat = document.getElementById('lat-input').value;
+    const lng = document.getElementById('lng-input').value;
+    const dataHoraInput = document.getElementById('data-hora-input');
+    const dataHora = dataHoraInput ? dataHoraInput.value : '';
+    const distrito = document.getElementById('distrito-input').value;
+
+    // 1. Validação
+    if (!tipo || !lat || !lng || !dataHora) {
+        alert("Por favor, preencha todos os campos obrigatórios e selecione um local no mapa.");
+        return;
+    }
+
+    // 2. Inteligência de Mapeamento: Descobre a Zona pelo Distrito
+    let zona = "Desconhecida";
+    const zonasSP = {
+        "Centro": ["Sé", "República", "Bela Vista", "Consolação", "Liberdade"],
+        "Sul": ["Santo Amaro", "Vila Mariana", "Jabaquara", "Moema", "Ipiranga"],
+        "Leste": ["Itaquera", "Tatuapé", "Mooca", "Penha", "Vila Prudente"],
+        "Norte": ["Santana", "Tucuruvi", "Freguesia do Ó", "Casa Verde", "Vila Maria"],
+        "Oeste": ["Pinheiros", "Lapa", "Butantã", "Vila Madalena", "Perdizes"]
+    };
+    
+    for (const [z, distritos] of Object.entries(zonasSP)) {
+        if (distritos.some(d => removerAcentos(d).toLowerCase() === removerAcentos(distrito).toLowerCase())) {
+            zona = z;
+            break;
+        }
+    }
+
+    // 3. Formata a data para o padrão do banco
+    const dataFormatada = dataHora.replace('T', ' ');
+
+    // 4. Monta o pacote de dados
+    const payload = {
+        tipo: tipo,
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        data_hora: dataFormatada,
+        distrito: distrito || "Desconhecido",
+        zona: zona
+    };
+
+    // 5. Envia para o servidor
+    fetch('/registrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'sucesso') {
+            mostrarToast();        // Chama a notificação visual
+            fecharModal();         // Fecha o formulário
+            atualizarInterface();  // Atualiza as bolinhas no mapa
+            carregarGrafico();     // Atualiza a barra do gráfico
+        } else {
+            alert("Erro ao registrar a ocorrência.");
+        }
+    })
+    .catch(erro => console.error("Erro no registro:", erro));
+}

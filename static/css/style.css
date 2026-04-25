@@ -719,3 +719,33 @@ body.dark-mode .caixa-metrica small {
     background-color: #2980b9;
     transform: translateX(-50%) scale(1.05);
 }
+
+/* ==========================================================================
+   NOTIFICAÇÃO FLUTUANTE (TOAST)
+   ========================================================================== */
+/* Substitua o bloco antigo do #toast-notificacao por este: */
+#toast-notificacao {
+    position: fixed;
+    bottom: 40px; /* Mudamos de 'top' para 'bottom' */
+    right: 20px;
+    background-color: #27ae60;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    opacity: 0;
+    transform: translateX(50px);
+    pointer-events: none;
+}
+
+#toast-notificacao.mostrar {
+    opacity: 1;
+    transform: translateX(0); 
+}
