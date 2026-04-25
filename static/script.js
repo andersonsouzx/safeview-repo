@@ -105,16 +105,20 @@ var tempMarker;
 let pinoDestaque = null;
 
 function obterIconePorCrime(tipo) {
-    let iconClass = 'fa-question-circle'; let colorClass = 'marker-other';
-    if (tipo.includes("Veículo")) { iconClass = 'fa-car-side'; colorClass = 'marker-car'; }
-    else if (tipo.includes("Pedestre") || tipo.includes("Celular")) { iconClass = 'fa-mobile-alt'; colorClass = 'marker-phone'; }
-    else if (tipo.includes("Agressão")) { iconClass = 'fa-user-shield'; colorClass = 'marker-person'; }
-    else if (tipo.includes("Vandalismo")) { iconClass = 'fa-spray-can'; colorClass = 'marker-vandal'; }
+    let iconClass = 'fa-question-circle';
+    let colorClass = 'marker-other';
+
+    // Verificação exata baseada nos novos nomes
+    if (tipo === "Roubo/Furto de Veículo") { iconClass = 'fa-car-side'; colorClass = 'marker-car'; }
+    else if (tipo === "Roubo/Furto a Pedestre") { iconClass = 'fa-mobile-alt'; colorClass = 'marker-phone'; }
+    else if (tipo === "Agressão Física") { iconClass = 'fa-user-shield'; colorClass = 'marker-person'; }
+    else if (tipo === "Vandalismo e Danos") { iconClass = 'fa-spray-can'; colorClass = 'marker-vandal'; }
 
     return L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="custom-map-pin ${colorClass}"><i class="fas ${iconClass}"></i></div>`,
-        iconSize: [30, 30], iconAnchor: [15, 30]
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
     });
 }
 
@@ -656,11 +660,12 @@ function atualizarFeedList(pontos, limite = 10) {
 
     // Desenha os cartões
     itensMostrar.forEach(p => {
-        let iconClass = 'fa-question-circle'; let colorHex = '#27ae60';
-        if (p.tipo.includes("Veículo")) { iconClass = 'fa-car-side'; colorHex = '#3498db'; }
-        else if (p.tipo.includes("Pedestre") || p.tipo.includes("Celular")) { iconClass = 'fa-mobile-alt'; colorHex = '#8e44ad'; }
-        else if (p.tipo.includes("Agressão")) { iconClass = 'fa-user-shield'; colorHex = '#e74c3c'; }
-        else if (p.tipo.includes("Vandalismo")) { iconClass = 'fa-spray-can'; colorHex = '#f39c12'; }
+        // Localize este trecho dentro da função atualizarFeedList
+        let iconClass = 'fa-question-circle'; let colorHex = '#27ae60'; // Cor para Atividade Suspeita
+        if (p.tipo === "Roubo/Furto de Veículo") { iconClass = 'fa-car-side'; colorHex = '#3498db'; }
+        else if (p.tipo === "Roubo/Furto a Pedestre") { iconClass = 'fa-mobile-alt'; colorHex = '#8e44ad'; }
+        else if (p.tipo === "Agressão Física") { iconClass = 'fa-user-shield'; colorHex = '#e74c3c'; }
+        else if (p.tipo === "Vandalismo e Danos") { iconClass = 'fa-spray-can'; colorHex = '#f39c12'; }
 
         const item = document.createElement('div');
         item.className = 'feed-item';
