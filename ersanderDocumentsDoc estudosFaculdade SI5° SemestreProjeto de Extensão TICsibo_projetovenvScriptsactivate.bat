@@ -1,0 +1,126 @@
+[33mcommit ca179953038a360296b5458cdf7aa785eb28860d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Apr 25 12:11:23 2026 -0300
+
+    Adicionando o limite de zoom para impedir que o mapa escuro gere um erro
+
+[33mcommit 43d11a76c92f57c536fc023ad6c41b06761996b0[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Apr 25 11:44:27 2026 -0300
+
+    Recriando o registro de ocorrência e implementando uma notificação quando o registro for feito
+
+[33mcommit 259da435c01ecd7ce3239cf8c73b91c6fc5fce0b[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Apr 25 11:08:46 2026 -0300
+
+    Mudança nos tipos, legenda e distribuição das ocorrências
+
+[33mcommit 3f30aac8f4778fba3f2dc229018af8b78549791f[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Thu Apr 23 19:18:10 2026 -0300
+
+    Finalizano gráfico e implementando botões reset
+
+[33mcommit 974d9d1486396002683baec4c7e24bed6fae0544[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Thu Apr 23 18:34:14 2026 -0300
+
+    Melhoria gráfico Ocorrências por Horário
+
+[33mcommit 1dfe39ddf61108a6f9166b874fb7ebbf46677a87[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Wed Apr 22 18:16:10 2026 -0300
+
+    Adicionando melhorias ao gráfico Ocorrências por Horário
+
+[33mcommit ff70eda08e747e71eecdcb1bff6ff7cef00bc2e5[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Wed Apr 22 17:48:23 2026 -0300
+
+    Construção do tópico Últimas Ocorrências
+
+[33mcommit e37fa266d508c5f2a7d7d28f446238bf9a818d9b[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Tue Apr 21 17:15:01 2026 -0300
+
+    Atualização registro de ocorrência via click
+
+[33mcommit d751d802c2ad7357bf67ee0ddcf992b355b47bd0[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Tue Apr 21 12:01:55 2026 -0300
+
+    Finalizando Registro de Ocorrências e reset do mapa
+
+[33mcommit f5335ea9144af13f6e293a30e1146bf387d6f170[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Mon Apr 20 16:02:25 2026 -0300
+
+    Finalizando Filtros
+
+[33mcommit f3deb3f033eaccfbc5acdbfe7f70c87d9e4d746f[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Apr 18 14:39:44 2026 -0300
+
+    Atualizando filtros de pesquisa
+
+[33mcommit ed56b7aa7d41ce79090576641ef1ab290f01b353[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Wed Apr 15 18:00:09 2026 -0300
+
+    Updates filtros de pesquisa
+
+[33mcommit 885565a7187e93af8204c26352ac34e4061a3376[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Tue Apr 14 16:58:29 2026 -0300
+
+    Atualizações de interface
+
+[33mcommit 2b048862b45f4da86d6858f4ce77f4c199de2392[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Apr 4 18:26:47 2026 -0300
+
+    update funcionalidades
+
+[33mcommit 5f98fbe81377619e73b78dead2fa0b7eab4790b0[m
+Merge: 4878496 0ecb60d
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sun Mar 29 16:29:00 2026 -0300
+
+    Merge branch 'main' of https://github.com/andersonsouzx/safeview-repo
+
+[33mcommit 4878496cf020135489311e13800144c5852dacff[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sun Mar 29 16:26:36 2026 -0300
+
+    Atualizando correções do mapa, busca e pop-ups
+
+[33mcommit 0ecb60d0de2f08631e13aa75bde3e2ce16f082a0[m
+Author: Anderson Souza <102629331+andersonsouzx@users.noreply.github.com>
+Date:   Sat Mar 21 22:15:48 2026 -0300
+
+    updt README
+
+[33mcommit 44d69330f2bd382bab08aeaa16f27f0ba696a2be[m
+Author: Anderson Souza <102629331+andersonsouzx@users.noreply.github.com>
+Date:   Sat Mar 21 20:09:28 2026 -0300
+
+    Atualizar o README.md
+
+[33mcommit 734504e6ef576daa292f24209e754c16dfcf199e[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Mar 21 18:04:58 2026 -0300
+
+    Ajustando tamanho da imagem do dashboard no README
+
+[33mcommit ebc58fe7c4d3a55b5b0fc0340f1c2ac7a82835d7[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Mar 21 18:01:33 2026 -0300
+
+    Ajustando tamanho da imagem do dashboard no README
+
+[33mcommit c23fbd0c397701ac183e0c7a18c0c5f60381821e[m
+Author: Anderson Souza <andersonsoutech@gmail.com>
+Date:   Sat Mar 21 17:36:43 2026 -0300
+
+    Commit inicial: Projeto SafeView com documentacao
