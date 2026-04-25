@@ -56,7 +56,7 @@ var map = L.map('map', {
     center: [-23.5505, -46.6333],
     zoom: 13,
     minZoom: 10,
-    maxZoom: 18
+    maxZoom: 16
 });
 
 document.getElementById('btn-reposicionar').addEventListener('click', function () {
@@ -130,7 +130,7 @@ map.on('click', function (e) {
 
     // --- A MÁGICA DO VOO ENTRA AQUI ---
     // Centraliza o mapa no ponto clicado com zoom 17 e uma animação de 1.5 segundos
-    map.flyTo(e.latlng, 17, { animate: true, duration: 1.5 });
+    map.flyTo(e.latlng, 16, { animate: true, duration: 1.5 });
 
     // 2. Atualiza as coordenadas para a base de dados
     document.getElementById('lat-input').value = e.latlng.lat;
