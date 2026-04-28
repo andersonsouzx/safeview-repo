@@ -335,7 +335,7 @@ const metricTotal = document.getElementById('metric-total');
                     }
                 }
                 
-                metricFrequent.innerText = tipoMaisFrequente;
+                metricFrequent.innerText = `${tipoMaisFrequente} (${maxCount})`;
             }
         }
         // --- FIM DA CORREÇÃO ---
@@ -877,4 +877,24 @@ function enviarRegistro() {
         }
     })
     .catch(erro => console.error("Erro no registro:", erro));
+}
+
+// --- LÓGICA DO CLIQUE NO MAIS FREQUENTE ---
+const cardFrequente = document.getElementById('card-frequent');
+
+if (cardFrequente) {
+    cardFrequente.addEventListener('click', () => {
+        const elementoTexto = document.getElementById('metric-frequent');
+        if (!elementoTexto || elementoTexto.innerText === '--') return;
+
+        // 1. Pega o nome exato do crime (remove os parênteses e espaços extras)
+        const tipoParaFiltrar = elementoTexto.innerText.split('(')[0].trim();
+        
+        // 2. O PULO DO GATO: Conecta com o filtro nativo que você já criou!
+        const selectTipo = document.getElementById('filtro-tipo');
+        if (selectTipo) {
+            selectTipo.value = tipoParaFiltrar; // Altera o dropdown "invisivelmente"
+            atualizarInterface(); // Roda a sua função principal que já faz o zoom, tira as bolhas e mostra o botão Reset!
+        }
+    });
 }
