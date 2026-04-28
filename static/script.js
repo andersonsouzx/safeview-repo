@@ -310,8 +310,35 @@ function atualizarInterface() {
         pinosSemBolha.clearLayers();
         if (camadaPoligono) { map.removeLayer(camadaPoligono); camadaPoligono = null; }
 
-        const metricTotal = document.getElementById('metric-total');
+const metricTotal = document.getElementById('metric-total');
         if (metricTotal) metricTotal.innerText = pontos.length;
+
+        // --- INÍCIO DA CORREÇÃO DO MAIS FREQUENTE ---
+        const metricFrequent = document.getElementById('metric-frequent');
+        if (metricFrequent) {
+            if (pontos.length === 0) {
+                metricFrequent.innerText = '--';
+            } else {
+                // Conta quantas vezes cada tipo aparece
+                const contagemTipos = {};
+                pontos.forEach(p => {
+                    contagemTipos[p.tipo] = (contagemTipos[p.tipo] || 0) + 1;
+                });
+
+                // Descobre qual tipo tem o maior número
+                let tipoMaisFrequente = '--';
+                let maxCount = 0;
+                for (const tipo in contagemTipos) {
+                    if (contagemTipos[tipo] > maxCount) {
+                        maxCount = contagemTipos[tipo];
+                        tipoMaisFrequente = tipo;
+                    }
+                }
+                
+                metricFrequent.innerText = tipoMaisFrequente;
+            }
+        }
+        // --- FIM DA CORREÇÃO ---
 
         pontos.forEach(p => {
             // Extrai a hora (ex: "2024-04-23 10:30" vira 10)
