@@ -6,7 +6,43 @@
     <title>SIBO SafeView | Dashboard TIC | The Halls</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* 1. Remove a borda branca padrão e o fundo do Leaflet */
+        .safeview-popup .leaflet-popup-content-wrapper {
+            padding: 0; /* Remove padding para o cabeçalho encostar nas bordas */
+            background: #ffffff; /* Fundo branco para o corpo do card */
+            border-radius: 4px; /* Bordas arredondadas no card todo */
+            overflow: hidden; /* Garante que o cabeçalho colorido respeite o arredondamento */
+            box-shadow: 0 3px 14px rgba(0,0,0,0.2); /* Sombra suave */
+        }
+
+        /* 2. Remove margens padrão do conteúdo */
+        .safeview-popup .leaflet-popup-content {
+            margin: 0;
+            line-height: inherit;
+        }
+
+        /* 3. Estiliza o botão de fechar (X) */
+        .safeview-popup .leaflet-popup-close-button {
+            color: #ffffff !important; /* Puro branco */
+            font-weight: bold;
+            font-size: 16px;
+            top: 8px !important; /* Posiciona centralizado no cabeçalho colorido */
+            right: 10px !important;
+            opacity: 0.7;
+            padding: 0;
+        }
+
+        .safeview-popup .leaflet-popup-close-button:hover {
+            opacity: 1;
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.15) !important; /* Brilho sutil no hover */
+            border-radius: 50%;
+        }
+    </style>
+    </head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 </head>

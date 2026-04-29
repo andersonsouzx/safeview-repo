@@ -340,7 +340,7 @@ const metricTotal = document.getElementById('metric-total');
         }
         // --- FIM DA CORREÇÃO ---
 
-        pontos.forEach(p => {
+pontos.forEach(p => {
             // Extrai a hora (ex: "2024-04-23 10:30" vira 10)
             const horaPonto = parseInt(p.data_hora.split(' ')[1].split(':')[0]);
 
@@ -349,8 +349,40 @@ const metricTotal = document.getElementById('metric-total');
                 return;
             }
 
+            // --- NOVO LAYOUT DO POPUP (Estilo Card Profissional com Correção de Bordas e 'X') ---
+            let iconClass = 'fa-question-circle'; let colorHex = '#27ae60';
+            if (p.tipo === "Roubo/Furto de Veículo") { iconClass = 'fa-car-side'; colorHex = '#3498db'; }
+            else if (p.tipo === "Roubo/Furto a Pedestre") { iconClass = 'fa-mobile-alt'; colorHex = '#8e44ad'; }
+            else if (p.tipo === "Agressão Física") { iconClass = 'fa-user-shield'; colorHex = '#e74c3c'; }
+            else if (p.tipo === "Vandalismo e Danos") { iconClass = 'fa-spray-can'; colorHex = '#f39c12'; }
+
+            const localExibicao = p.distrito ? p.distrito : "Localização Registrada";
+
+            // Layout simplificado: removemos margins negativas porque usaremos classe CSS no popup
+            const conteudoBolha = `
+                <div style="min-width: 180px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 4px; overflow: hidden;">
+                    <div style="background-color: ${colorHex}; color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas ${iconClass}" style="font-size: 16px; width: 16px; text-align: center;"></i>
+                        <strong style="font-size: 14px; margin: 0; letter-spacing: 0.5px; padding-right: 25px;">${p.tipo}</strong>
+                    </div>
+                    <div style="padding: 12px;">
+                        <div style="font-size: 13px; color: #2c3e50; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px;">
+                            <i class="fas fa-map-marker-alt" style="color: ${colorHex}; margin-top: 3px; width: 14px; text-align: center;"></i>
+                            <span style="line-height: 1.3;">${localExibicao}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #7f8c8d; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ecf0f1; padding-top: 8px; margin-top: 10px;">
+                            <i class="far fa-clock" style="width: 14px; text-align: center;"></i>
+                            <span>${p.data_hora}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // MODIFICAÇÃO AQUI: Adicionado { className: 'safeview-popup' }
+            // Isso nos permite controlar o visual externo via CSS no index.html
             let m = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) })
-                .bindPopup(`<strong>${p.tipo}</strong><br><small>${p.data_hora}</small>`);
+                .bindPopup(conteudoBolha, { className: 'safeview-popup' });
+            // --- FIM DO NOVO LAYOUT ---
 
             temFiltroAtivo ? pinosSemBolha.addLayer(m) : markerGroup.addLayer(m);
         });
@@ -489,7 +521,7 @@ function buscarEndereco() {
                 tempMarker = L.marker([lat, lng]).addTo(map);
 
                 // 4. Faz o voo (zoom) até ao local
-                map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
+                map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
 
                 // 5. Descobre o distrito exato desse novo ponto para o formulário
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
@@ -707,34 +739,40 @@ function atualizarFeedList(pontos, limite = 10) {
             </div>
         `;
 
-        item.addEventListener('click', () => {
+item.addEventListener('click', () => {
             fecharPainel('popup-feed');
 
+            // Limpa os outros pinos para focar no selecionado
             if (map.hasLayer(markerGroup)) map.removeLayer(markerGroup);
             if (typeof pinosSemBolha !== 'undefined' && map.hasLayer(pinosSemBolha)) map.removeLayer(pinosSemBolha);
             if (pinoDestaque) map.removeLayer(pinoDestaque);
 
+            // --- NOVO LAYOUT DO POPUP (Estilo Card Profissional) ---
             const conteudoBolha = `
-                <div style="text-align: center; min-width: 160px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                    <div style="font-size: 28px; color: ${colorHex}; margin-bottom: 8px;">
-                        <i class="fas ${iconClass}"></i>
+                <div style="min-width: 180px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 4px; overflow: hidden;">
+                    <div style="background-color: ${colorHex}; color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas ${iconClass}" style="font-size: 16px; width: 16px; text-align: center;"></i>
+                        <strong style="font-size: 14px; margin: 0; letter-spacing: 0.5px; padding-right: 25px;">${p.tipo}</strong>
                     </div>
-                    <strong style="display: block; font-size: 15px; color: #2c3e50; margin-bottom: 8px; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px;">
-                        ${p.tipo}
-                    </strong>
-                    <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; gap: 5px;">
-                        <i class="far fa-clock"></i> ${p.data_hora}
-                    </div>
-                    <div style="font-size: 12px; color: #7f8c8d; display: flex; justify-content: center; align-items: center; gap: 5px;">
-                        <i class="fas fa-map-marker-alt"></i> ${localExibicao}
+                    <div style="padding: 12px;">
+                        <div style="font-size: 13px; color: #2c3e50; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px;">
+                            <i class="fas fa-map-marker-alt" style="color: ${colorHex}; margin-top: 3px; width: 14px; text-align: center;"></i>
+                            <span style="line-height: 1.3;">${localExibicao}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #7f8c8d; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ecf0f1; padding-top: 8px; margin-top: 10px;">
+                            <i class="far fa-clock" style="width: 14px; text-align: center;"></i>
+                            <span>${p.data_hora}</span>
+                        </div>
                     </div>
                 </div>
             `;
 
+            // Cria o pino de destaque e adiciona a classe 'safeview-popup' para remover as bordas
             pinoDestaque = L.marker([p.lat, p.lng], { icon: obterIconePorCrime(p.tipo) }).addTo(map);
-            pinoDestaque.bindPopup(conteudoBolha).openPopup();
+            pinoDestaque.bindPopup(conteudoBolha, { className: 'safeview-popup' }).openPopup();
 
-            map.flyTo([p.lat, p.lng], 18, { animate: true, duration: 1.5 });
+            // Zoom limitado a 16 para evitar o erro do "mapa branco"
+            map.flyTo([p.lat, p.lng], 16, { animate: true, duration: 1.5 });
             document.getElementById('btn-reset-mapa').style.display = 'block';
         });
 
