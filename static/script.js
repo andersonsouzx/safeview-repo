@@ -853,6 +853,19 @@ function mostrarToast() {
     }
 }
 
+function mostrarToastErro(mensagem) {
+    const toast = document.getElementById('toast-erro');
+    const textoToast = document.getElementById('texto-toast-erro');
+    
+    if (toast && textoToast) {
+        textoToast.innerText = mensagem;
+        toast.classList.add('mostrar');
+        setTimeout(() => {
+            toast.classList.remove('mostrar');
+        }, 3500);
+    }
+}
+
 function enviarRegistro() {
     const tipo = document.getElementById('tipo-crime').value;
     const lat = document.getElementById('lat-input').value;
@@ -861,10 +874,19 @@ function enviarRegistro() {
     const dataHora = dataHoraInput ? dataHoraInput.value : '';
     const distrito = document.getElementById('distrito-input').value;
 
-    // 1. Validação
+    // 1. Validação de campos vazios
     if (!tipo || !lat || !lng || !dataHora) {
-        alert("Por favor, preencha todos os campos obrigatórios e selecione um local no mapa.");
-        return;
+        mostrarToastErro("Por favor, preencha todos os campos.");
+        return; // O return garante que o modal NÃO feche
+    }
+
+    // --- NOVA VALIDAÇÃO: IMPEDIR DATAS NO FUTURO ---
+    const dataEscolhida = new Date(dataHora);
+    const dataAtual = new Date();
+    
+    if (dataEscolhida > dataAtual) {
+        mostrarToastErro("Data inválida: o registro não pode estar no futuro.");
+        return; // O return garante que o modal NÃO feche
     }
 
     // 2. Inteligência de Mapeamento: Descobre a Zona pelo Distrito

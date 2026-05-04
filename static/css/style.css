@@ -723,29 +723,22 @@ body.dark-mode .caixa-metrica small {
 /* ==========================================================================
    NOTIFICAÇÃO FLUTUANTE (TOAST)
    ========================================================================== */
-/* Substitua o bloco antigo do #toast-notificacao por este: */
-#toast-notificacao {
+#toast-notificacao, #toast-erro {
     position: fixed;
-    bottom: 40px; /* Mudamos de 'top' para 'bottom' */
+    bottom: -100px;
     right: 20px;
-    background-color: #27ae60;
+    background-color: #2ecc71; /* O verde fica aqui, mas o HTML sobrepõe com vermelho! */
     color: white;
     padding: 15px 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     font-weight: bold;
-    font-size: 14px;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
     opacity: 0;
-    transform: translateX(50px);
-    pointer-events: none;
 }
 
-#toast-notificacao.mostrar {
+#toast-notificacao.mostrar, #toast-erro.mostrar {
+    bottom: 20px;
     opacity: 1;
-    transform: translateX(0); 
 }
