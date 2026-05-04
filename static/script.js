@@ -641,7 +641,7 @@ if (inputEndereco) {
                             if (tempMarker) map.removeLayer(tempMarker);
                             tempMarker = L.marker([lat, lng]).addTo(map);
 
-                            map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
+                            map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
 
                             if (local.address) {
                                 const distritoDescoberto = end.suburb || end.city_district || end.neighbourhood;
