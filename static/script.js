@@ -706,8 +706,8 @@ function atualizarFeedList(pontos, limite = 10) {
     // Limpa a lista antes de desenhar (necessário para quando o limite aumenta)
     feedLista.innerHTML = '';
 
-    // Inverte a lista para ter as mais recentes no topo
-    const todasOcorrencias = pontos.slice().reverse();
+    // Mantém a ordem original enviada pelo servidor (mais recentes no topo)
+    const todasOcorrencias = pontos.slice();
 
     // Corta a lista baseada no limite atual (10, 20, 30...)
     const itensMostrar = todasOcorrencias.slice(0, limite);
@@ -935,4 +935,22 @@ if (cardFrequente) {
             atualizarInterface(); // Roda a sua função principal que já faz o zoom, tira as bolhas e mostra o botão Reset!
         }
     });
+}
+
+// --- FUNÇÃO PARA FORMATAR A DATA PARA O PADRÃO BRASILEIRO ---
+function formatarDataBR(dataString) {
+    if (!dataString) return '';
+    // Espera formato "YYYY-MM-DD HH:MM"
+    const partes = dataString.split(' ');
+    if (partes.length !== 2) return dataString; // Retorna original se o formato for inesperado
+
+    const dataPartes = partes[0].split('-');
+    if (dataPartes.length !== 3) return dataString;
+
+    const ano = dataPartes[0];
+    const mes = dataPartes[1];
+    const dia = dataPartes[2];
+    const hora = partes[1];
+
+    return `${dia}/${mes}/${ano} ${hora}`;
 }

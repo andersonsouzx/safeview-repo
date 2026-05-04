@@ -79,7 +79,7 @@ def dados():
         query += " AND zona = ?"
         parametros.append(zona_filtro)
 
-    query += " ORDER BY id DESC"
+    query += " ORDER BY data_hora DESC"
     
     cursor.execute(query, parametros)
     ocorrencias = cursor.fetchall()
