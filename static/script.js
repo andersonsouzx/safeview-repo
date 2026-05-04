@@ -310,7 +310,7 @@ function atualizarInterface() {
         pinosSemBolha.clearLayers();
         if (camadaPoligono) { map.removeLayer(camadaPoligono); camadaPoligono = null; }
 
-const metricTotal = document.getElementById('metric-total');
+        const metricTotal = document.getElementById('metric-total');
         if (metricTotal) metricTotal.innerText = pontos.length;
 
         // --- INÍCIO DA CORREÇÃO DO MAIS FREQUENTE ---
@@ -334,13 +334,13 @@ const metricTotal = document.getElementById('metric-total');
                         tipoMaisFrequente = tipo;
                     }
                 }
-                
+
                 metricFrequent.innerText = `${tipoMaisFrequente} (${maxCount})`;
             }
         }
         // --- FIM DA CORREÇÃO ---
 
-pontos.forEach(p => {
+        pontos.forEach(p => {
             // Extrai a hora (ex: "2024-04-23 10:30" vira 10)
             const horaPonto = parseInt(p.data_hora.split(' ')[1].split(':')[0]);
 
@@ -372,7 +372,7 @@ pontos.forEach(p => {
                         </div>
                         <div style="font-size: 12px; color: #7f8c8d; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ecf0f1; padding-top: 8px; margin-top: 10px;">
                             <i class="far fa-clock" style="width: 14px; text-align: center;"></i>
-                            <span>${p.data_hora}</span>
+                            <span>${formatarDataBR(p.data_hora)}</span>
                         </div>
                     </div>
                 </div>
@@ -735,11 +735,11 @@ function atualizarFeedList(pontos, limite = 10) {
             <div class="feed-content">
                 <div class="feed-title">${p.tipo}</div>
                 <div class="feed-address"><i class="fas fa-map-marker-alt" style="color:#7f8c8d; font-size:10px;"></i> ${localExibicao}</div>
-                <div class="feed-time"><i class="far fa-clock" style="color:#7f8c8d; font-size:10px;"></i> ${p.data_hora}</div>
+                <div class="feed-time"><i class="far fa-clock" style="color:#7f8c8d; font-size:10px;"></i> ${formatarDataBR(p.data_hora)}</div>
             </div>
         `;
 
-item.addEventListener('click', () => {
+        item.addEventListener('click', () => {
             fecharPainel('popup-feed');
 
             // Limpa os outros pinos para focar no selecionado
@@ -761,7 +761,7 @@ item.addEventListener('click', () => {
                         </div>
                         <div style="font-size: 12px; color: #7f8c8d; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ecf0f1; padding-top: 8px; margin-top: 10px;">
                             <i class="far fa-clock" style="width: 14px; text-align: center;"></i>
-                            <span>${p.data_hora}</span>
+                            <span>${formatarDataBR(p.data_hora)}</span>
                         </div>
                     </div>
                 </div>
@@ -876,7 +876,7 @@ function enviarRegistro() {
         "Norte": ["Santana", "Tucuruvi", "Freguesia do Ó", "Casa Verde", "Vila Maria"],
         "Oeste": ["Pinheiros", "Lapa", "Butantã", "Vila Madalena", "Perdizes"]
     };
-    
+
     for (const [z, distritos] of Object.entries(zonasSP)) {
         if (distritos.some(d => removerAcentos(d).toLowerCase() === removerAcentos(distrito).toLowerCase())) {
             zona = z;
@@ -903,18 +903,18 @@ function enviarRegistro() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'sucesso') {
-            mostrarToast();        // Chama a notificação visual
-            fecharModal();         // Fecha o formulário
-            atualizarInterface();  // Atualiza as bolinhas no mapa
-            carregarGrafico();     // Atualiza a barra do gráfico
-        } else {
-            alert("Erro ao registrar a ocorrência.");
-        }
-    })
-    .catch(erro => console.error("Erro no registro:", erro));
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'sucesso') {
+                mostrarToast();        // Chama a notificação visual
+                fecharModal();         // Fecha o formulário
+                atualizarInterface();  // Atualiza as bolinhas no mapa
+                carregarGrafico();     // Atualiza a barra do gráfico
+            } else {
+                alert("Erro ao registrar a ocorrência.");
+            }
+        })
+        .catch(erro => console.error("Erro no registro:", erro));
 }
 
 // --- LÓGICA DO CLIQUE NO MAIS FREQUENTE ---
@@ -927,7 +927,7 @@ if (cardFrequente) {
 
         // 1. Pega o nome exato do crime (remove os parênteses e espaços extras)
         const tipoParaFiltrar = elementoTexto.innerText.split('(')[0].trim();
-        
+
         // 2. O PULO DO GATO: Conecta com o filtro nativo que você já criou!
         const selectTipo = document.getElementById('filtro-tipo');
         if (selectTipo) {
