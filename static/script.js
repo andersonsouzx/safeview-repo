@@ -952,5 +952,5 @@ function formatarDataBR(dataString) {
     const dia = dataPartes[2];
     const hora = partes[1];
 
-    return `${dia}/${mes}/${ano} ${hora}`;
+    return `${dia}/${mes}/${ano} - ${hora}`;
 }
