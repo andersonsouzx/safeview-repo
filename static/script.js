@@ -976,3 +976,5 @@ function formatarDataBR(dataString) {
 
     return `${dia}/${mes}/${ano} - ${hora}`;
 }
+
+//
