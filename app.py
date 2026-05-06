@@ -28,7 +28,13 @@ def init_db():
     conn.commit()
     conn.close()
 
+# NOVA ROTA: A página de entrada (Landing Page) que o usuário vê primeiro
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+# A ROTA ANTIGA DO MAPA: Agora acessada pelo botão da Landing Page
+@app.route('/mapa')
 def index():
     return render_template('index.html')
 

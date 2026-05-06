@@ -68,28 +68,40 @@ var escuroBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/servic
 var escuroTextos = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
 var mapaEscuro = L.layerGroup([escuroBase, escuroTextos]);
 
-mapaClaro.addTo(map);
+// --- O MAPA AGORA NASCE NO MODO ESCURO ---
+mapaEscuro.addTo(map);
+document.body.classList.add('dark-mode');
 
-// --- FUNÇÃO DO MODO ESCURO ---
-let modoEscuroAtivo = false;
+// --- FUNÇÃO DO MODO ESCURO (Lógica Invertida) ---
+let modoEscuroAtivo = true; // Agora começa como VERDADEIRO
+
 function alternarTema() {
     modoEscuroAtivo = !modoEscuroAtivo;
     document.body.classList.toggle('dark-mode');
+    
     const btnIcone = document.querySelector('#btn-dark-mode i');
     const btnTexto = document.querySelector('#btn-dark-mode span');
 
     if (modoEscuroAtivo) {
         map.removeLayer(mapaClaro);
         mapaEscuro.addTo(map);
-        btnIcone.className = 'fas fa-sun';
-        btnTexto.innerText = 'Modo Claro';
+        if (btnIcone) btnIcone.className = 'fas fa-sun';
+        if (btnTexto) btnTexto.innerText = 'Modo Claro';
     } else {
         map.removeLayer(mapaEscuro);
         mapaClaro.addTo(map);
-        btnIcone.className = 'fas fa-moon';
-        btnTexto.innerText = 'Modo Escuro';
+        if (btnIcone) btnIcone.className = 'fas fa-moon';
+        if (btnTexto) btnTexto.innerText = 'Modo Escuro';
     }
 }
+
+// Garante que o botão mostre "Modo Claro" assim que a página carregar
+document.addEventListener("DOMContentLoaded", () => {
+    const btnIcone = document.querySelector('#btn-dark-mode i');
+    const btnTexto = document.querySelector('#btn-dark-mode span');
+    if (btnIcone) btnIcone.className = 'fas fa-sun';
+    if (btnTexto) btnTexto.innerText = 'Modo Claro';
+});
 
 // --- CAMADAS DE DADOS (CLUSTERS E PINOS) ---
 var markerGroup = L.markerClusterGroup({

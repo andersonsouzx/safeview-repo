@@ -47,23 +47,26 @@
             opacity: 1;
             color: #ffffff !important;
             background: rgba(255, 255, 255, 0.15) !important;
-            /* Brilho sutil no hover */
             border-radius: 50%;
         }
     </style>
-</head>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 </head>
 
 <body>
 
     <div id="sidebar">
-        <h1 style="display: flex; align-items: center; gap: 12px;">
-            <img src="{{ url_for('static', filename='SvLogo.png') }}" alt="Logo SafeView"
-                style="height: 35px; width: 35px; object-fit: contain;">
-            SIBO SafeView
-        </h1>
+
+        <a href="/" style="text-decoration: none; color: inherit;">
+            <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px; transition: opacity 0.2s;"
+                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <img src="{{ url_for('static', filename='SvLogo.png') }}" alt="Logo SafeView"
+                    style="height: 35px; width: 35px; object-fit: contain;">
+                SafeView
+            </h1>
+        </a>
 
         <div class="menu-item" onclick="abrirModalRegistro()">
             <i class="fas fa-edit"></i> Registrar Ocorrência

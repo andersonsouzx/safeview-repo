@@ -742,3 +742,84 @@ body.dark-mode .caixa-metrica small {
     bottom: 20px;
     opacity: 1;
 }
+
+/* Garante que o link do logo não mude a cor nem o estilo do texto */
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Ajuste o espaço entre a imagem e o texto se necessário */
+}
+
+.logo-link:hover {
+    opacity: 0.8; /* Dá um leve efeito visual ao passar o mouse */
+    cursor: pointer;
+}
+
+/* =========================================
+   MODO ESCURO - CONTROLES DO MAPA (LIMPO)
+   ========================================= */
+
+/* 1. Fundo escuro para TODOS os botões (Zoom e Recentralizar) */
+body.dark-mode .leaflet-bar a,
+body.dark-mode .leaflet-bar button,
+body.dark-mode .easy-button-button,
+body.dark-mode .leaflet-control-locate a {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #374151 !important;
+}
+
+/* 2. Efeito Hover (Fica Azul) */
+body.dark-mode .leaflet-bar a:hover,
+body.dark-mode .leaflet-bar button:hover,
+body.dark-mode .easy-button-button:hover,
+body.dark-mode .leaflet-control-locate a:hover {
+    background-color: #374151 !important;
+    color: #3498db !important;
+}
+
+/* 3. Garante que o ícone da mira/alvo também fique azul no hover */
+body.dark-mode .leaflet-bar a:hover i,
+body.dark-mode .leaflet-bar button:hover i,
+body.dark-mode .easy-button-button:hover i,
+body.dark-mode .leaflet-control-locate a:hover i {
+    color: #3498db !important;
+}
+
+/* 4. Rodapé do Leaflet (Direitos Autorais translúcido) */
+body.dark-mode .leaflet-control-attribution {
+    background-color: rgba(31, 41, 55, 0.7) !important;
+    color: #94a3b8 !important;
+    border: none !important;
+}
+
+body.dark-mode .leaflet-control-attribution a {
+    color: #3498db !important;
+    background: transparent !important;
+    text-decoration: none;
+}
+
+/* =========================================
+   MODO ESCURO - BOTÃO DE REPOSICIONAR
+   ========================================= */
+
+/* Deixa o fundo cinza escuro e o ícone branco */
+body.dark-mode #btn-reposicionar {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border: 1px solid #374151 !important;
+}
+
+/* Efeito Hover: Fundo levemente mais claro e ícone AZUL */
+body.dark-mode #btn-reposicionar:hover {
+    background-color: #374151 !important;
+    color: #3498db !important;
+    cursor: pointer;
+}
+
+/* Força o ícone interno (mira) a ficar azul no hover */
+body.dark-mode #btn-reposicionar:hover i {
+    color: #3498db !important;
+}
