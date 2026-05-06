@@ -198,8 +198,9 @@
     <div class="glow"></div>
 
     <header>
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='SvLogo.png') }}" alt="SafeView Logo">
+        <div class="logo-container" style="user-select: none; cursor: default;">
+            <img src="{{ url_for('static', filename='SvLogo.png') }}" alt="SafeView Logo" draggable="false"
+                style="pointer-events: none; -webkit-user-drag: none;">
             <div class="logo-text">Safe<span>View</span></div>
         </div>
     </header>
