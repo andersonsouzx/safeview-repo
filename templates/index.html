@@ -49,6 +49,30 @@
             background: rgba(255, 255, 255, 0.15) !important;
             border-radius: 50%;
         }
+
+        /* Pinta o fundo absoluto do navegador para evitar o flash branco */
+        html {
+            background-color: #020617;
+        }
+
+        /* --- ANIMAÇÃO DE ENTRADA DO SISTEMA --- */
+        body {
+            animation: systemFadeIn 1s ease-out forwards;
+            background-color: #020617;
+            /* Garante a continuidade da cor */
+        }
+
+        @keyframes systemFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
