@@ -196,11 +196,51 @@
                 padding: 20px 0 0 0;
             }
         }
+
+        .live-pin {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: pingAnimation 4s ease-out forwards;
+        }
+
+        @keyframes pingAnimation {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+
+            20% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 15px rgba(52, 152, 219, 0.2);
+            }
+
+            80% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 40px rgba(52, 152, 219, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
     </style>
 
 </head>
 
 <body>
+    <div id="live-background"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none;">
+    </div>
     <div class="glow"></div>
 
     <header>
@@ -319,20 +359,41 @@
         }
     </style>
 
-    <script>
+<script>
+        // 1. Código do botão de acesso
         document.querySelector('.btn-start').addEventListener('click', function (e) {
-            // Pegamos a URL do atributo data-url para o navegador não "fofocar" o link no canto
             const targetUrl = this.getAttribute('data-url');
-
             const overlay = document.getElementById('transition-overlay');
             overlay.style.pointerEvents = 'all';
             overlay.style.opacity = '1';
 
-            // Mantive o seu tempo de carregamento de 2.5 segundos
             setTimeout(() => {
                 window.location.href = targetUrl;
             }, 2500);
         });
+
+        // 2. CÓDIGO NOVO: Gerador de pinos no fundo
+        function createLivePin() {
+            const bg = document.getElementById('live-background');
+            if (!bg) return;
+
+            const pin = document.createElement('div');
+            pin.classList.add('live-pin');
+
+            const randomX = Math.floor(Math.random() * 90) + 5;
+            const randomY = Math.floor(Math.random() * 90) + 5;
+            
+            pin.style.left = randomX + 'vw';
+            pin.style.top = randomY + 'vh';
+
+            bg.appendChild(pin);
+
+            setTimeout(() => {
+                pin.remove();
+            }, 4000);
+        }
+
+        setInterval(createLivePin, 900);
     </script>
 
 </body>
