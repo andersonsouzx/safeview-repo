@@ -347,18 +347,34 @@
             text-transform: uppercase;
         }
 
-        body {
-            animation: fadeIn 1s ease-out;
+/* --- ANIMAÇÃO DE ENTRADA (CASCATA) --- */
+        @keyframes fadeUp {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
+        /* O cabeçalho aparece imediatamente */
+        header {
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out forwards;
+        }
 
-            to {
-                opacity: 1;
-            }
+        /* O centro aparece 0.3 segundos depois */
+        .presentation-box {
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out 0.3s forwards;
+        }
+
+        /* O rodapé aparece 0.6 segundos depois */
+        .features {
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out 0.6s forwards;
         }
     </style>
 
