@@ -45,7 +45,7 @@
         }
 
         header {
-            padding: 40px 8%;
+            padding: 80px 8%;
             z-index: 10;
         }
 
@@ -81,8 +81,12 @@
         }
 
         .presentation-box {
-            max-width: 850px;
-            animation: slideUp 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            margin-top: -150px;
         }
 
         h1 {
@@ -131,7 +135,10 @@
         .features {
             display: flex;
             gap: 40px;
-            margin-top: 80px;
+            /* O segredo está aqui: fixa o bloco no fundo da tela */
+            position: absolute;
+            bottom: 115px;
+            z-index: 10;
         }
 
         .feature-item {
@@ -253,11 +260,7 @@
 
     <main>
         <div class="presentation-box">
-            <h1>Gestão de Segurança <span>Baseada em Dados</span></h1>
-            <p class="description">
-                Uma plataforma estratégica desenvolvida para transformar dados brutos em inteligência visual.
-                Analise ocorrências, identifique padrões e otimize a tomada de decisão territorial em tempo real.
-            </p>
+            <h1 style="margin-bottom: 50px;">Gestão de Segurança <span>Baseada em Dados</span></h1>
 
             <a class="btn-start" data-url="/mapa" style="cursor: pointer;">Acessar Painel Interativo</a>
         </div>
@@ -359,7 +362,7 @@
         }
     </style>
 
-<script>
+    <script>
         // 1. Código do botão de acesso
         document.querySelector('.btn-start').addEventListener('click', function (e) {
             const targetUrl = this.getAttribute('data-url');
@@ -382,7 +385,7 @@
 
             const randomX = Math.floor(Math.random() * 90) + 5;
             const randomY = Math.floor(Math.random() * 90) + 5;
-            
+
             pin.style.left = randomX + 'vw';
             pin.style.top = randomY + 'vh';
 
