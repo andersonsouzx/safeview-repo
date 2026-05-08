@@ -47,31 +47,41 @@
         header {
             display: flex;
             justify-content: space-between;
-            /* Distribui os elementos para as extremidades */
             align-items: center;
-            padding: 40px 8%;
+            padding: 80px 8% 20px 8%;
+            /* Deixe o padding original aqui para não puxar o site */
             background-color: transparent;
             z-index: 10;
             width: 100%;
+
+            /* --- O TRUQUE PARA SUBIR SEM PUXAR O RESTO --- */
+            position: relative;
+            top: -35px;
+            /* <-- Mexa apenas neste valor! Se quiser subir mais, coloque -40px, -50px... */
         }
 
         .logo-left img {
-            height: 45px;
+            height: 75px;
             /* Altura do escudo */
             width: auto;
         }
 
         .name-right {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--text-main);
-            /* Agora o "Safe" fica branco */
+            display: flex;
+            align-items: center;
         }
 
-        /* Adicione este bloco para pintar apenas o "View" */
-        .name-right span {
-            color: var(--accent);
+        .name-right img {
+            height: 45px;
+            /* <-- Você pode aumentar ou diminuir esse valor para ajustar o tamanho do letreiro */
+            width: auto;
+        }
+
+        /* Bloqueia interações com as imagens do cabeçalho */
+        header img {
+            pointer-events: none;       /* Impede o clique direito e a opção de "abrir em nova guia" */
+            user-select: none;          /* Impede de ser selecionada/grifada */
+            -webkit-user-drag: none;    /* Impede de ser arrastada com o mouse */
         }
 
         .logo-container {
@@ -105,13 +115,39 @@
             z-index: 10;
         }
 
+        /* 1. CONTROLE DO TÍTULO */
         .presentation-box {
+            position: relative;
+            top: -30px;
+            /* <-- MEXA AQUI PARA SUBIR OU DESCER SÓ O TÍTULO */
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* 2. CONTROLE DO BOTÃO */
+        .button-box {
+            position: relative;
+            top: -10px;
+            /* <-- MEXA AQUI PARA SUBIR OU DESCER SÓ O BOTÃO */
+            margin-top: 20px;
+            /* Deixe esse fixo como base */
+            margin-bottom: 50px;
+            /* Deixe esse fixo como base */
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
             z-index: 10;
-            margin-top: -150px;
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out 0.45s forwards;
+        }
+
+        /* 3. CONTROLE DOS TÓPICOS INFERIORES */
+        .features {
+            position: relative;
+            top: 45px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            z-index: 10;
         }
 
         h1 {
@@ -156,26 +192,18 @@
             background-color: #5dade2;
         }
 
-        /* Os 3 tópicos para preencher a tela com inteligência */
-        .features {
-            display: flex;
-            gap: 40px;
-            /* O segredo está aqui: fixa o bloco no fundo da tela */
-            position: absolute;
-            bottom: 115px;
-            z-index: 10;
-        }
-
         .feature-item {
-            text-align: left;
-            border-left: 2px solid rgba(52, 152, 219, 0.3);
-            padding-left: 20px;
+            text-align: center;
+            /* Centraliza o texto do tópico */
+            padding: 0 75px;
+            /* Cria o espaço exato e igual de cada lado */
+            border-right: 2px solid rgba(52, 152, 219, 0.3);
+            /* Coloca a linha na direita */
         }
 
         /* Remove a linha APENAS do primeiro item (Monitoramento) */
-        .feature-item:first-child {
-            border-left: none;
-            padding-left: 0;
+        .feature-item:last-child {
+            border-right: none;
         }
 
         .feature-item h3 {
@@ -191,12 +219,21 @@
         }
 
         footer {
-            padding: 40px;
+            position: relative;
+            top: 20px;
+            /* <-- Aumente este valor para empurrar o texto mais para baixo */
+            padding: 50px;
             text-align: center;
             font-size: 0.8rem;
             color: #475569;
             text-transform: uppercase;
             letter-spacing: 2px;
+            z-index: 10;
+
+            /* --- ADICIONANDO O EFEITO DE TRANSIÇÃO --- */
+            opacity: 0;
+            /* Entra em 0.8 segundos (logo depois dos tópicos que entram em 0.6s) */
+            animation: fadeUp 0.8s ease-out 0.8s forwards;
         }
 
         @keyframes slideUp {
@@ -282,15 +319,17 @@
             <img src="{{ url_for('static', filename='SafeView_Escudo.png') }}" alt="SafeView Logo">
         </div>
         <div class="name-right">
-            Safe<span>View</span>
+            <img src="{{ url_for('static', filename='SafeView_Name.png') }}" alt="SafeView Letreiro">
         </div>
     </header>
 
     <main>
         <div class="presentation-box">
-            <h1 style="margin-bottom: 50px;">Segurança <span>Baseada em Dados Reais</span></h1>
+            <h1>Segurança<br><span>Baseada em Dados Reais</span></h1>
+        </div>
 
-            <a class="btn-start" data-url="/mapa" style="cursor: pointer;">Iniciar Mapeamento</a>
+        <div class="button-box">
+            <button class="btn-start" data-url="/mapa">Iniciar Mapeamento</button>
         </div>
 
         <div class="features">
