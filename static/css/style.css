@@ -50,12 +50,38 @@ body {
     transition: 0.3s;
 }
 
-#sidebar h1 {
-    font-size: 20px;
-    margin-bottom: 35px;
-    border-bottom: 2px solid var(--light-blue);
-    padding-bottom: 15px;
-    color: var(--text-light);
+/* =========================================
+   AJUSTE FINAL DO LOGO E LINHA DIVISORA
+   ========================================= */
+
+.sidebar-header-link {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 45px; /* Espaço entre a linha e os botões abaixo */
+    border-bottom: 2px solid var(--light-blue); /* A linha azul de separação */
+    padding-bottom: 30px; /* Espaço entre o logo e a linha azul */
+    text-decoration: none;
+    transition: opacity 0.2s;
+    width: 100%; /* Garante que a linha atravesse toda a largura da sidebar */
+}
+
+.sidebar-header-link:hover {
+    opacity: 0.8;
+}
+
+.sidebar-logo {
+    width: 190px; /* Tamanho reduzido para ficar mais elegante */
+    height: auto; 
+    max-height: 55px; /* Limite de altura para não empurrar o layout */
+    object-fit: contain;
+    display: block;
+
+    margin-top: 15px;
+    
+    /* Mantém os bloqueios de interação */
+    pointer-events: none; 
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .menu-item {

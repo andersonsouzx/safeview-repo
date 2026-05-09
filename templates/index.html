@@ -83,13 +83,9 @@
 
     <div id="sidebar">
 
-        <a href="/" style="text-decoration: none; color: inherit;">
-            <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px; transition: opacity 0.2s;"
-                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                <img src="{{ url_for('static', filename='SvLogo.png') }}" alt="Logo SafeView"
-                    style="height: 35px; width: 35px; object-fit: contain;">
-                SafeView
-            </h1>
+        <a href="/" class="sidebar-header-link">
+            <img src="{{ url_for('static', filename='SafeView_Logo.png') }}" alt="Logo SafeView"
+                class="sidebar-logo">
         </a>
 
         <div class="menu-item" onclick="abrirModalRegistro()">
@@ -322,7 +318,7 @@
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
-        window.onload = function() {
+        window.onload = function () {
             window.scrollTo(0, 0);
         };
     </script>
