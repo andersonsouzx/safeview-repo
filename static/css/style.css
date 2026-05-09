@@ -51,34 +51,63 @@ body {
 }
 
 /* =========================================
-   AJUSTE FINAL DO LOGO E LINHA DIVISORA
+   AJUSTE FINAL DO LOGO E LINHA GIROFLEX
    ========================================= */
 
 .sidebar-header-link {
     display: flex;
     justify-content: center;
-    margin-bottom: 45px; /* Espaço entre a linha e os botões abaixo */
-    border-bottom: 2px solid var(--light-blue); /* A linha azul de separação */
-    padding-bottom: 30px; /* Espaço entre o logo e a linha azul */
+    margin-top: 15px; 
+    margin-bottom: 35px; 
+    padding-bottom: 30px; 
     text-decoration: none;
     transition: opacity 0.2s;
-    width: 100%; /* Garante que a linha atravesse toda a largura da sidebar */
+    width: 100%; 
+    
+    /* Posição relativa é essencial para "prender" a linha animada aqui */
+    position: relative; 
+    
+    /* REMOVEMOS O border-bottom ANTIGO DAQUI */
 }
 
 .sidebar-header-link:hover {
     opacity: 0.8;
 }
 
+/* CRIANDO A LINHA ANIMADA DE POLÍCIA */
+.sidebar-header-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px; /* Deixei 1px mais grossa para o efeito brilhar bem */
+    
+    /* Degrau de cores: Vermelho -> Escuro -> Azul -> Escuro -> Vermelho */
+    background: linear-gradient(90deg, #ff0033, #1a252f, #0055ff, #1a252f, #ff0033);
+    background-size: 200% 100%;
+    
+    /* Controla a velocidade do giroflex (1.5s). Diminua para piscar mais rápido */
+    animation: sirene_policia 1.5s linear infinite;
+    
+    border-radius: 2px;
+    /* Sombra brilhante misturando vermelho e azul */
+    box-shadow: 0 2px 8px rgba(255, 0, 51, 0.4), 0 2px 8px rgba(0, 85, 255, 0.4);
+}
+
+/* O motor da animação que faz as cores correrem */
+@keyframes sirene_policia {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 .sidebar-logo {
-    width: 190px; /* Tamanho reduzido para ficar mais elegante */
+    width: 190px; 
     height: auto; 
-    max-height: 55px; /* Limite de altura para não empurrar o layout */
+    max-height: 55px; 
     object-fit: contain;
     display: block;
-
-    margin-top: 15px;
     
-    /* Mantém os bloqueios de interação */
     pointer-events: none; 
     user-select: none;
     -webkit-user-drag: none;
