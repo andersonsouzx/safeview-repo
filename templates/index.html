@@ -83,9 +83,8 @@
 
     <div id="sidebar">
 
-        <a href="/" class="sidebar-header-link">
-            <img src="{{ url_for('static', filename='SafeView_Logo.png') }}" alt="Logo SafeView"
-                class="sidebar-logo">
+        <a onclick="window.location.href='/'" class="sidebar-header-link" style="cursor: pointer;">
+            <img src="{{ url_for('static', filename='SafeView_Logo.png') }}" alt="Logo SafeView" class="sidebar-logo">
         </a>
 
         <div class="menu-item" onclick="abrirModalRegistro()">
