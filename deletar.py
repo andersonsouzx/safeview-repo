@@ -6,7 +6,7 @@ cursor = conn.cursor()
 
 # ---------------------------------------------------------
 # COLOQUE AQUI O ID DA OCORRÊNCIA QUE VOCÊ QUER APAGAR:
-id_para_apagar = 1
+id_para_apagar = 428
 # ---------------------------------------------------------
 
 # Comando SQL para deletar a ocorrência específica

@@ -2,6 +2,28 @@ import sqlite3
 import random
 from datetime import datetime, timedelta
 
+# O SEGREDO DO CONGELAMENTO: Esta semente garante que os dados gerados 
+# sejam sempre idênticos, criando uma base de dados "fixa" e segura para a apresentação.
+random.seed(42)
+
+def gerar_hora_realista(tipo):
+    """Gera um horário baseado no comportamento real de cada tipo de crime."""
+    horas = list(range(24))
+    
+    if tipo == "Roubo/Furto a Pedestre":
+        # Picos agressivos na hora de ponta (17h-20h) e almoço.
+        pesos = [1, 1, 1, 1, 1, 3, 8, 12, 10, 8, 6, 8, 15, 14, 10, 10, 15, 20, 18, 12, 8, 5, 3, 2]
+    elif tipo == "Roubo/Furto de Veículo":
+        pesos = [4, 3, 2, 2, 2, 2, 5, 8, 6, 5, 5, 5, 6, 6, 6, 6, 8, 10, 12, 15, 18, 15, 12, 8]
+    elif tipo == "Vandalismo e Danos":
+        pesos = [15, 20, 18, 15, 10, 5, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 5, 8, 10, 12, 12]
+    elif tipo == "Agressão Física":
+        pesos = [12, 15, 12, 8, 5, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 8, 10, 12, 15, 15, 15]
+    else: # Atividade Suspeita
+        pesos = [8, 8, 8, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 8, 10, 12, 12, 12, 10, 10, 8]
+        
+    return random.choices(horas, weights=pesos, k=1)[0]
+
 def recriar_banco_realista():
     conn = sqlite3.connect('sibo.db')
     cursor = conn.cursor()
@@ -18,7 +40,6 @@ def recriar_banco_realista():
         )
     ''')
 
-    # Dicionário Expandido: Limites geográficos mais amplos para espalhamento orgânico
     zonas_sp = {
         "Centro": {
             "Sé": (-23.555, -23.540, -46.640, -46.620),
@@ -57,9 +78,10 @@ def recriar_banco_realista():
         }
     }
 
-    print("Gerando 400 ocorrências com distribuição orgânica por São Paulo...")
+    print("A gerar 428 ocorrências fixas para a demonstração do SafeView...")
 
-    for _ in range(400):
+    # Fixado em 428 registos
+    for _ in range(428):
         zona = random.choice(list(zonas_sp.keys()))
         distrito = random.choice(list(zonas_sp[zona].keys()))
         lat_min, lat_max, lng_min, lng_max = zonas_sp[zona][distrito]
@@ -67,18 +89,32 @@ def recriar_banco_realista():
         lat = round(random.uniform(lat_min, lat_max), 6)
         lng = round(random.uniform(lng_min, lng_max), 6)
         
-        if zona in ["Centro", "Oeste"]:
+        # O PULO DO GATO: Distribuição equilibrada para a demonstração (Mix de cores no mapa)
+        if distrito in ["Pinheiros", "Sé", "República", "Consolação", "Vila Madalena"]:
+            # Reduzimos o pedestre de 80% para 50% para dar espaço aos outros
             tipo = random.choices(
                 ["Roubo/Furto a Pedestre", "Roubo/Furto de Veículo", "Agressão Física", "Vandalismo e Danos", "Atividade Suspeita"], 
-                weights=[45, 15, 10, 20, 10], k=1
+                weights=[50, 15, 15, 10, 10], k=1
+            )[0]
+        elif zona in ["Leste", "Sul", "Norte"]:
+            # Mantemos o foco em veículos nas áreas residenciais, mas bem distribuído
+            tipo = random.choices(
+                ["Roubo/Furto a Pedestre", "Roubo/Furto de Veículo", "Agressão Física", "Vandalismo e Danos", "Atividade Suspeita"], 
+                weights=[30, 40, 10, 10, 10], k=1
             )[0]
         else:
+            # Áreas mistas
             tipo = random.choices(
                 ["Roubo/Furto a Pedestre", "Roubo/Furto de Veículo", "Agressão Física", "Vandalismo e Danos", "Atividade Suspeita"], 
-                weights=[20, 45, 10, 10, 15], k=1
+                weights=[35, 30, 15, 10, 10], k=1
             )[0]
 
-        data = datetime.now() - timedelta(days=random.randint(0, 30), hours=random.randint(0, 23), minutes=random.randint(0, 59))
+        dias_atras = random.randint(0, 30)
+        hora_inteligente = gerar_hora_realista(tipo)
+        minuto_aleatorio = random.randint(0, 59)
+        
+        data = datetime.now() - timedelta(days=dias_atras)
+        data = data.replace(hour=hora_inteligente, minute=minuto_aleatorio)
         data_str = data.strftime("%Y-%m-%d %H:%M")
 
         cursor.execute('''
@@ -88,7 +124,7 @@ def recriar_banco_realista():
 
     conn.commit()
     conn.close()
-    print("Banco populado com sucesso! A cidade agora tem um mapa de calor realista.")
+    print("Base de dados finalizada! Os dados estão congelados e prontos para uso.")
 
 if __name__ == "__main__":
     recriar_banco_realista()
